@@ -24,7 +24,7 @@
       color:var(--text);
       background: linear-gradient(180deg, var(--bg1) 0%, var(--bg2) 55%);
     }
-    .wrap{ max-width: 900px; margin:0 auto; }
+    .wrap{ max-width: 980px; margin:0 auto; }
     header{ margin-bottom:14px; }
     h1{
       font-size: 22px;
@@ -52,7 +52,7 @@
       gap: 12px;
       margin-top: 12px;
     }
-    @media (min-width: 820px){
+    @media (min-width: 900px){
       .grid{ grid-template-columns: 1fr 1fr; }
       .card{ padding:18px; }
       h1{ font-size: 26px; }
@@ -119,8 +119,8 @@
       gap: 12px;
       margin-top: 10px;
     }
-    @media (min-width: 820px){
-      .products{ grid-template-columns: 1fr 1fr; }
+    @media (min-width: 900px){
+      .products{ grid-template-columns: 1fr 1fr 1fr; }
     }
 
     .product{
@@ -144,23 +144,10 @@
       max-width: 52ch;
     }
 
-    .resultRow{
-      display:flex;
-      align-items:flex-start;
-      justify-content:flex-start;
-      gap: 12px;
-      padding-top: 10px;
-      margin-top: 10px;
+    .resultWrap{
+      padding-top: 12px;
+      margin-top: 12px;
       border-top: 1px solid var(--border);
-      flex-wrap: wrap;
-    }
-    .resultLabel{
-      font-size: 12px;
-      font-weight: 900;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: .06em;
-      min-width: 80px;
     }
     .resultValue{
       font-size: 18px;
@@ -168,7 +155,6 @@
       letter-spacing: -0.02em;
       margin: 0;
       text-align:left;
-      flex: 1;
     }
     .resultValue.danger{ color: var(--danger); }
     .resultValue.ok{ color: var(--ok); }
@@ -177,15 +163,15 @@
       display:flex;
       gap:10px;
       flex-wrap:wrap;
-      margin-top: 12px;
+      margin-top: 10px;
     }
     button{
       border: 1px solid var(--border);
       background: #fff;
-      border-radius: 14px;
-      padding: 10px 12px;
+      border-radius: 12px;
+      padding: 7px 10px;           /* smaller */
       font-weight: 800;
-      font-size: 14px;
+      font-size: 12.5px;           /* smaller */
       cursor: pointer;
     }
     button:hover{ background:#fafbff; }
@@ -234,13 +220,12 @@
             <p class="productTitle">Airoframe Wall Hanger</p>
             <p class="productSub">This wall hanger works separately from our other products as a tool to securely hang your discs on the wall.</p>
 
-            <div class="resultRow">
-              <div class="resultLabel">Result</div>
-              <div class="resultValue" id="hangerValue">—</div>
+            <div class="resultWrap">
+              <p class="resultValue" id="hangerValue">—</p>
             </div>
 
             <div class="btnrowInCard">
-              <button id="copyWallBtn" type="button" disabled>Copy Wall Hanger</button>
+              <button id="copyWallBtn" type="button" disabled>Copy Size</button>
             </div>
           </div>
 
@@ -248,13 +233,25 @@
             <p class="productTitle">Airoframe Custom Mount</p>
             <p class="productSub">Custom mounts are for the Air or Shield frames and don't work as a stand alone product.</p>
 
-            <div class="resultRow">
-              <div class="resultLabel">Result</div>
-              <div class="resultValue" id="mountValue">—</div>
+            <div class="resultWrap">
+              <p class="resultValue" id="mountValue">—</p>
             </div>
 
             <div class="btnrowInCard">
-              <button id="copyMountBtn" type="button" disabled>Copy Custom Mount</button>
+              <button id="copyMountBtn" type="button" disabled>Copy Size</button>
+            </div>
+          </div>
+
+          <div class="product" id="variableCard">
+            <p class="productTitle">Airoframe Variable Mount</p>
+            <p class="productSub">The variable mount works with the Air and Shield frames and won't work as a stand alone product.</p>
+
+            <div class="resultWrap">
+              <p class="resultValue" id="variableValue">—</p>
+            </div>
+
+            <div class="btnrowInCard">
+              <button id="copyVariableBtn" type="button" disabled>Copy Size</button>
             </div>
           </div>
         </div>
@@ -278,14 +275,18 @@
 
   const wallCard = document.getElementById('wallCard');
   const mountCard = document.getElementById('mountCard');
+  const variableCard = document.getElementById('variableCard');
 
   const elHanger = document.getElementById('hangerValue');
   const elMount = document.getElementById('mountValue');
+  const elVariable = document.getElementById('variableValue');
 
   const copyWallBtn = document.getElementById('copyWallBtn');
   const copyMountBtn = document.getElementById('copyMountBtn');
+  const copyVariableBtn = document.getElementById('copyVariableBtn');
 
   const INCOMPAT = 'Disc Selected Is Incompatible';
+  const VAR_OK = 'Compatible with Variable Mount';
 
   let discs = [];
   let byMfg = new Map();
@@ -330,6 +331,10 @@
     const outer = d ? toNum(d.outer_mm) : NaN;
     return (Number.isFinite(inner) && Number.isFinite(outer) && inner >= 159 && outer <= 230);
   }
+  function variableCompatible(d){
+    // same rules as custom mount
+    return mountCompatible(d);
+  }
 
   function setResult(el, text, kind){
     el.textContent = text;
@@ -357,11 +362,12 @@
     summary.textContent = text;
   }
 
-  function setProductsVisibility(showAny, showWall, showMount){
+  function setProductsVisibility(showAny, showWall, showMount, showVar){
     sectionTitle.style.display = showAny ? 'block' : 'none';
     products.style.display = showAny ? 'grid' : 'none';
     wallCard.style.display = showWall ? 'block' : 'none';
     mountCard.style.display = showMount ? 'block' : 'none';
+    variableCard.style.display = showVar ? 'block' : 'none';
   }
 
   function render(){
@@ -369,11 +375,13 @@
       elPicked.innerHTML = '<span>Selected Disc:</span> —';
       setPositiveLine('');
       setSummary('');
-      setProductsVisibility(false, false, false);
+      setProductsVisibility(false, false, false, false);
       setResult(elHanger,'—',null);
       setResult(elMount,'—',null);
+      setResult(elVariable,'—',null);
       copyWallBtn.disabled = true;
       copyMountBtn.disabled = true;
+      copyVariableBtn.disabled = true;
       return;
     }
 
@@ -381,22 +389,32 @@
 
     const wallOK = hangerCompatible(current);
     const mountOK = mountCompatible(current);
+    const varOK = variableCompatible(current);
 
-    // show/hide cards based on compatibility
-    setProductsVisibility((wallOK || mountOK), wallOK, mountOK);
+    setProductsVisibility((wallOK || mountOK || varOK), wallOK, mountOK, varOK);
 
     // Positive line (ONLY positive statements)
     if(wallOK && mountOK){
       setPositiveLine('Your disc will work with the wall hanger and the custom mount.');
+    }else if(wallOK && !mountOK && varOK){
+      // if mount not ok but var ok shouldn't happen since same rules, but keep clean
+      setPositiveLine('Your disc will work with the wall hanger and the variable mount.');
     }else if(wallOK && !mountOK){
       setPositiveLine('Your disc will work with the wall hanger.');
-    }else if(!wallOK && mountOK){
-      setPositiveLine('Your disc will work with the custom mount.');
+    }else if(!wallOK && (mountOK || varOK)){
+      // mention both mount types as a group
+      if(mountOK && varOK){
+        setPositiveLine('Your disc will work with the custom mount and the variable mount.');
+      }else if(mountOK){
+        setPositiveLine('Your disc will work with the custom mount.');
+      }else{
+        setPositiveLine('Your disc will work with the variable mount.');
+      }
     }else{
       setPositiveLine('');
     }
 
-    // Results inside each card (still set even if hidden, harmless)
+    // Set values (even if hidden)
     if(wallOK){
       setResult(elHanger, current.hanger_size || INCOMPAT, 'ok');
     }else{
@@ -410,20 +428,33 @@
       setResult(elMount, INCOMPAT, 'danger');
     }
 
-    // Dynamic summary always explains
-    if(wallOK && mountOK){
-      setSummary('Summary: Your disc is compatible with both Airoframe products.');
-    }else if(wallOK && !mountOK){
-      setSummary('Summary: Your disc is compatible with the Wall Hanger. The Custom Mount is not compatible for this disc.');
-    }else if(!wallOK && mountOK){
-      setSummary('Summary: Your disc is compatible with the Custom Mount. The Wall Hanger is not compatible for this disc.');
+    if(varOK){
+      setResult(elVariable, VAR_OK, 'ok');
     }else{
-      setSummary('Summary: This disc is not compatible with the Wall Hanger or the Custom Mount.');
+      setResult(elVariable, INCOMPAT, 'danger');
     }
 
-    // Enable copy buttons only for visible compatible products
+    // Summary
+    if(wallOK && mountOK){
+      setSummary('Summary: Your disc is compatible with the Wall Hanger, Custom Mount, and Variable Mount.');
+    }else if(wallOK && !mountOK && !varOK){
+      setSummary('Summary: Your disc is compatible with the Wall Hanger only.');
+    }else if(!wallOK && mountOK && varOK){
+      setSummary('Summary: Your disc is compatible with the Custom Mount and Variable Mount.');
+    }else if(!wallOK && mountOK){
+      setSummary('Summary: Your disc is compatible with the Custom Mount only.');
+    }else if(!wallOK && varOK){
+      setSummary('Summary: Your disc is compatible with the Variable Mount only.');
+    }else if(wallOK && (mountOK || varOK)){
+      setSummary('Summary: Your disc is compatible with the Wall Hanger and your frame mount options.');
+    }else{
+      setSummary('Summary: This disc is not compatible with the Wall Hanger or frame mounts.');
+    }
+
+    // Copy buttons enabled only when product is compatible (and visible)
     copyWallBtn.disabled = !wallOK;
     copyMountBtn.disabled = !mountOK;
+    copyVariableBtn.disabled = !varOK;
   }
 
   async function init(){
@@ -461,33 +492,45 @@
 
   copyWallBtn.addEventListener('click', async ()=>{
     if(!current) return;
-    const wallOK = hangerCompatible(current);
-    if(!wallOK) return;
+    if(!hangerCompatible(current)) return;
     const result = current.hanger_size || INCOMPAT;
     const text =
 `Airoframe Wall Hanger
 Disc: ${current.manufacturer} — ${current.model}
-Result: ${result}`;
+Size: ${result}`;
     try{
       await navigator.clipboard.writeText(text);
       copyWallBtn.textContent = 'Copied';
-      setTimeout(()=> copyWallBtn.textContent = 'Copy Wall Hanger', 900);
+      setTimeout(()=> copyWallBtn.textContent = 'Copy Size', 900);
     }catch(e){}
   });
 
   copyMountBtn.addEventListener('click', async ()=>{
     if(!current) return;
-    const mountOK = mountCompatible(current);
-    if(!mountOK) return;
+    if(!mountCompatible(current)) return;
     const result = `Size ${toNum(current.inner_mm)}`;
     const text =
 `Airoframe Custom Mount
 Disc: ${current.manufacturer} — ${current.model}
-Result: ${result}`;
+Size: ${result}`;
     try{
       await navigator.clipboard.writeText(text);
       copyMountBtn.textContent = 'Copied';
-      setTimeout(()=> copyMountBtn.textContent = 'Copy Custom Mount', 900);
+      setTimeout(()=> copyMountBtn.textContent = 'Copy Size', 900);
+    }catch(e){}
+  });
+
+  copyVariableBtn.addEventListener('click', async ()=>{
+    if(!current) return;
+    if(!variableCompatible(current)) return;
+    const text =
+`Airoframe Variable Mount
+Disc: ${current.manufacturer} — ${current.model}
+Status: ${VAR_OK}`;
+    try{
+      await navigator.clipboard.writeText(text);
+      copyVariableBtn.textContent = 'Copied';
+      setTimeout(()=> copyVariableBtn.textContent = 'Copy Size', 900);
     }catch(e){}
   });
 
