@@ -110,10 +110,11 @@
       letter-spacing: .08em;
       color: var(--muted);
       font-weight: 900;
+      display:none;
     }
 
     .products{
-      display:grid;
+      display:none;
       grid-template-columns: 1fr;
       gap: 12px;
       margin-top: 10px;
@@ -226,9 +227,9 @@
         <p class="picked"><span>Selected Disc:</span> —</p>
         <div class="positiveLine" id="positiveLine"></div>
 
-        <div class="sectionTitle">Recommended products</div>
+        <div class="sectionTitle" id="sectionTitle">Recommended products</div>
 
-        <div class="products">
+        <div class="products" id="products">
           <div class="product" id="wallCard">
             <p class="productTitle">Airoframe Wall Hanger</p>
             <p class="productSub">This wall hanger works separately from our other products as a tool to securely hang your discs on the wall.</p>
@@ -271,6 +272,12 @@
   const elPicked = document.querySelector('.picked');
   const positiveLine = document.getElementById('positiveLine');
   const summary = document.getElementById('summary');
+
+  const sectionTitle = document.getElementById('sectionTitle');
+  const products = document.getElementById('products');
+
+  const wallCard = document.getElementById('wallCard');
+  const mountCard = document.getElementById('mountCard');
 
   const elHanger = document.getElementById('hangerValue');
   const elMount = document.getElementById('mountValue');
@@ -350,11 +357,19 @@
     summary.textContent = text;
   }
 
+  function setProductsVisibility(showAny, showWall, showMount){
+    sectionTitle.style.display = showAny ? 'block' : 'none';
+    products.style.display = showAny ? 'grid' : 'none';
+    wallCard.style.display = showWall ? 'block' : 'none';
+    mountCard.style.display = showMount ? 'block' : 'none';
+  }
+
   function render(){
     if(!current){
       elPicked.innerHTML = '<span>Selected Disc:</span> —';
       setPositiveLine('');
       setSummary('');
+      setProductsVisibility(false, false, false);
       setResult(elHanger,'—',null);
       setResult(elMount,'—',null);
       copyWallBtn.disabled = true;
@@ -367,6 +382,10 @@
     const wallOK = hangerCompatible(current);
     const mountOK = mountCompatible(current);
 
+    // show/hide cards based on compatibility
+    setProductsVisibility((wallOK || mountOK), wallOK, mountOK);
+
+    // Positive line (ONLY positive statements)
     if(wallOK && mountOK){
       setPositiveLine('Your disc will work with the wall hanger and the custom mount.');
     }else if(wallOK && !mountOK){
@@ -377,6 +396,7 @@
       setPositiveLine('');
     }
 
+    // Results inside each card (still set even if hidden, harmless)
     if(wallOK){
       setResult(elHanger, current.hanger_size || INCOMPAT, 'ok');
     }else{
@@ -390,6 +410,7 @@
       setResult(elMount, INCOMPAT, 'danger');
     }
 
+    // Dynamic summary always explains
     if(wallOK && mountOK){
       setSummary('Summary: Your disc is compatible with both Airoframe products.');
     }else if(wallOK && !mountOK){
@@ -400,8 +421,9 @@
       setSummary('Summary: This disc is not compatible with the Wall Hanger or the Custom Mount.');
     }
 
-    copyWallBtn.disabled = false;
-    copyMountBtn.disabled = false;
+    // Enable copy buttons only for visible compatible products
+    copyWallBtn.disabled = !wallOK;
+    copyMountBtn.disabled = !mountOK;
   }
 
   async function init(){
@@ -440,7 +462,8 @@
   copyWallBtn.addEventListener('click', async ()=>{
     if(!current) return;
     const wallOK = hangerCompatible(current);
-    const result = wallOK ? (current.hanger_size || INCOMPAT) : INCOMPAT;
+    if(!wallOK) return;
+    const result = current.hanger_size || INCOMPAT;
     const text =
 `Airoframe Wall Hanger
 Disc: ${current.manufacturer} — ${current.model}
@@ -455,7 +478,8 @@ Result: ${result}`;
   copyMountBtn.addEventListener('click', async ()=>{
     if(!current) return;
     const mountOK = mountCompatible(current);
-    const result = mountOK ? `Size ${toNum(current.inner_mm)}` : INCOMPAT;
+    if(!mountOK) return;
+    const result = `Size ${toNum(current.inner_mm)}`;
     const text =
 `Airoframe Custom Mount
 Disc: ${current.manufacturer} — ${current.model}
