@@ -3,86 +3,207 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Airoframe Disc Compatability & Size Finder</title>
+  <title>Airoframe Disc Compatibility &amp; Size Finder</title>
   <style>
     :root{
-      --text:#0b0f19; --muted:#5b6472; --border:#e6e8ee;
+      --text:#0b0f19;
+      --muted:#5b6472;
+      --border:#e6e8ee;
       --shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
-      --radius: 18px; --danger:#b42318; --ok:#067647;
-      --bg1:#f7f8fb; --bg2:#ffffff;
-      --infoBg:#f0f7ff; --infoBorder:#cfe6ff; --infoText:#0b3b80;
+      --radius: 18px;
+      --danger:#b42318;
+      --ok:#067647;
+      --bg1:#f7f8fb;
+      --bg2:#ffffff;
+
+      --infoBg:#f0f7ff;
+      --infoBorder:#cfe6ff;
+      --infoText:#0b3b80;
     }
+
     *{ box-sizing:border-box; }
+
     body{
-      margin:0; padding:28px 18px 40px;
+      margin:0;
+      padding:28px 18px 48px;
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
       color:var(--text);
       background: linear-gradient(180deg, var(--bg1) 0%, var(--bg2) 55%);
     }
-    .wrap{ max-width: 980px; margin:0 auto; }
-    header{ margin-bottom:14px; }
-    h1{ font-size:22px; letter-spacing:-0.02em; margin:0; font-weight:900; }
-    .sub{ margin:8px 0 0; color:var(--muted); font-size:13px; line-height:1.45; max-width:76ch; }
-    .card{ background:#fff; border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); padding:16px; }
-    .grid{ display:grid; grid-template-columns:1fr; gap:12px; margin-top:12px; }
-    @media (min-width: 900px){
-      .grid{ grid-template-columns:1fr 1fr; }
-      .card{ padding:18px; }
-      h1{ font-size:26px; }
-    }
-    label{ display:block; font-weight:800; font-size:12px; color:var(--muted); margin:0 0 8px; letter-spacing:.02em; text-transform:uppercase; }
-    select{ width:100%; appearance:none; padding:12px 12px; border-radius:14px; border:1px solid var(--border); background:#fff; font-size:14px; outline:none; }
-    select:focus{ box-shadow:0 0 0 4px rgba(59,130,246,.12); border-color:#c9d6ff; }
 
-    .selected{ margin-top:16px; padding-top:14px; border-top:1px solid var(--border); }
-    .picked{ font-weight:900; font-size:14px; margin:0; }
-    .picked span{ color:var(--muted); font-weight:800; }
+    .wrap{ max-width: 980px; margin:0 auto; }
+    header{ margin-bottom:16px; }
+
+    h1{
+      font-size: 22px;
+      letter-spacing:-0.02em;
+      margin:0;
+      font-weight: 900;
+    }
+
+    .sub{
+      margin:8px 0 0;
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.45;
+      max-width: 76ch;
+    }
+
+    .card{
+      background:#fff;
+      border:1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding:18px;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    @media (min-width: 900px){
+      .grid{ grid-template-columns: 1fr 1fr; }
+      .card{ padding:20px; }
+      h1{ font-size: 26px; }
+    }
+
+    label{
+      display:block;
+      font-weight:800;
+      font-size: 12px;
+      color: var(--muted);
+      margin: 0 0 8px;
+      letter-spacing: .02em;
+      text-transform: uppercase;
+    }
+
+    select{
+      width: 100%;
+      appearance: none;
+      padding: 12px 12px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: #fff;
+      font-size: 14px;
+      outline: none;
+    }
+
+    select:focus{
+      box-shadow: 0 0 0 4px rgba(59,130,246,.12);
+      border-color:#c9d6ff;
+    }
 
     .infoBubble{
-      margin-top:12px;
+      margin-top: 16px;
       display:none;
-      padding:12px 12px;
-      border-radius:14px;
-      border:1px solid var(--infoBorder);
-      background:var(--infoBg);
-      color:var(--infoText);
-      font-weight:900;
-      font-size:13px;
-      line-height:1.35;
+      padding: 14px 14px;
+      border-radius: 16px;
+      border: 1px solid var(--infoBorder);
+      background: var(--infoBg);
+      color: var(--infoText);
+      font-weight: 900;
+      font-size: 13px;
+      line-height: 1.35;
     }
+
     .infoBubble .label{
       display:inline-block;
-      font-weight:950;
-      letter-spacing:.02em;
-      text-transform:uppercase;
-      font-size:11px;
-      margin-right:8px;
-      opacity:.9;
+      font-weight: 950;
+      letter-spacing: .02em;
+      text-transform: uppercase;
+      font-size: 11px;
+      margin-right: 8px;
+      opacity: .9;
     }
 
-    .products{ display:none; grid-template-columns:1fr; gap:12px; margin-top:12px; }
-    @media (min-width: 900px){ .products{ grid-template-columns:1fr 1fr 1fr; } }
+    .products{
+      display:none;
+      grid-template-columns: 1fr;
+      gap: 18px;
+      margin-top: 18px;
+      padding-top: 6px;
+    }
 
-    .product{ border:1px solid var(--border); border-radius:18px; padding:16px; background:#fff; }
-    .productTitle{ margin:0; font-size:15px; font-weight:950; letter-spacing:-0.01em; }
-    .productSub{ margin:6px 0 0; color:var(--muted); font-size:12px; line-height:1.45; max-width:52ch; }
-    .resultWrap{ padding-top:12px; margin-top:12px; border-top:1px solid var(--border); }
-    .resultValue{ font-size:18px; font-weight:950; letter-spacing:-0.02em; margin:0; text-align:left; }
-    .resultValue.danger{ color:var(--danger); }
-    .resultValue.ok{ color:var(--ok); }
+    @media (min-width: 900px){
+      .products{ grid-template-columns: 1fr 1fr 1fr; }
+    }
 
-    .btnrowInCard{ display:flex; gap:10px; flex-wrap:wrap; margin-top:10px; }
-    button{ border:1px solid var(--border); background:#fff; border-radius:12px; padding:7px 10px; font-weight:800; font-size:12.5px; cursor:pointer; }
+    .product{
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 18px;
+      background: #fff;
+      box-shadow: 0 10px 22px rgba(15, 23, 42, 0.06);
+    }
+
+    .productTitle{
+      margin:0;
+      font-size: 15px;
+      font-weight: 950;
+      letter-spacing: -0.01em;
+    }
+
+    .productSub{
+      margin:6px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+      max-width: 52ch;
+    }
+
+    .resultWrap{
+      padding-top: 12px;
+      margin-top: 12px;
+      border-top: 1px solid var(--border);
+    }
+
+    .resultValue{
+      font-size: 18px;
+      font-weight: 950;
+      letter-spacing: -0.02em;
+      margin: 0;
+      text-align:left;
+    }
+
+    .resultValue.danger{ color: var(--danger); }
+    .resultValue.ok{ color: var(--ok); }
+
+    .btnrowInCard{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top: 10px;
+    }
+
+    button{
+      border: 1px solid var(--border);
+      background: #fff;
+      border-radius: 12px;
+      padding: 7px 10px;
+      font-weight: 800;
+      font-size: 12.5px;
+      cursor: pointer;
+    }
+
     button:hover{ background:#fafbff; }
     button:disabled{ opacity:.5; cursor:not-allowed; }
 
-    .summary{ margin-top:12px; font-size:12px; color:var(--muted); line-height:1.45; display:none; }
+    .summary{
+      margin-top: 14px;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.45;
+      display:none;
+    }
   </style>
 </head>
 <body>
   <div class="wrap">
     <header>
-      <h1>Airoframe Disc Compatability & Size Finder</h1>
+      <h1>Airoframe Disc Compatibility &amp; Size Finder</h1>
       <p class="sub">Select your disc to get the recommended Airoframe product sizes.</p>
     </header>
 
@@ -90,46 +211,46 @@
       <div class="grid">
         <div>
           <label for="manufacturer">Manufacturer</label>
-          <select id="manufacturer"><option value="">Loading…</option></select>
+          <select id="manufacturer">
+            <option value="">Loading…</option>
+          </select>
         </div>
         <div>
           <label for="model">Disc Model</label>
-          <select id="model" disabled><option value="">Select a manufacturer first</option></select>
+          <select id="model" disabled>
+            <option value="">Select a manufacturer first</option>
+          </select>
         </div>
       </div>
 
-      <div class="selected">
-        <p class="picked"><span>Selected Disc:</span> —</p>
-
-        <div class="infoBubble" id="infoBubble">
-          <span class="label">Compatibility</span>
-          <span id="positiveLine"></span>
-        </div>
-
-        <div class="products" id="products">
-          <div class="product" id="wallCard">
-            <p class="productTitle">Airoframe Wall Hanger</p>
-            <p class="productSub">This wall hanger works separately from our other products as a tool to securely hang your discs on the wall.</p>
-            <div class="resultWrap"><p class="resultValue" id="hangerValue">—</p></div>
-            <div class="btnrowInCard"><button id="copyWallBtn" type="button" disabled>Copy Size</button></div>
-          </div>
-
-          <div class="product" id="mountCard">
-            <p class="productTitle">Airoframe Custom Mount</p>
-            <p class="productSub">Custom mounts are for the Air or Shield frames and don't work as a stand alone product.</p>
-            <div class="resultWrap"><p class="resultValue" id="mountValue">—</p></div>
-            <div class="btnrowInCard"><button id="copyMountBtn" type="button" disabled>Copy Size</button></div>
-          </div>
-
-          <div class="product" id="variableCard">
-            <p class="productTitle">Airoframe Variable Mount</p>
-            <p class="productSub">The variable mount works with the Air and Shield frames and won't work as a stand alone product.</p>
-            <div class="resultWrap"><p class="resultValue" id="variableValue">—</p></div>
-          </div>
-        </div>
-
-        <div class="summary" id="summary"></div>
+      <div class="infoBubble" id="infoBubble">
+        <span class="label">Compatibility</span>
+        <span id="positiveLine"></span>
       </div>
+
+      <div class="products" id="products">
+        <div class="product" id="wallCard">
+          <p class="productTitle">Airoframe Wall Hanger</p>
+          <p class="productSub">This wall hanger works separately from our other products as a tool to securely hang your discs on the wall.</p>
+          <div class="resultWrap"><p class="resultValue" id="hangerValue">—</p></div>
+          <div class="btnrowInCard"><button id="copyWallBtn" type="button" disabled>Copy Size</button></div>
+        </div>
+
+        <div class="product" id="mountCard">
+          <p class="productTitle">Airoframe Custom Mount</p>
+          <p class="productSub">Custom mounts are for the Air or Shield frames and don't work as a stand alone product.</p>
+          <div class="resultWrap"><p class="resultValue" id="mountValue">—</p></div>
+          <div class="btnrowInCard"><button id="copyMountBtn" type="button" disabled>Copy Size</button></div>
+        </div>
+
+        <div class="product" id="variableCard">
+          <p class="productTitle">Airoframe Variable Mount</p>
+          <p class="productSub">The variable mount works with the Air and Shield frames and won't work as a stand alone product.</p>
+          <div class="resultWrap"><p class="resultValue" id="variableValue">—</p></div>
+        </div>
+      </div>
+
+      <div class="summary" id="summary"></div>
     </div>
   </div>
 
@@ -138,7 +259,6 @@
   const elMfg = document.getElementById('manufacturer');
   const elModel = document.getElementById('model');
 
-  const elPicked = document.querySelector('.picked');
   const infoBubble = document.getElementById('infoBubble');
   const positiveLine = document.getElementById('positiveLine');
   const summary = document.getElementById('summary');
@@ -162,8 +282,13 @@
   let byMfg = new Map();
   let current = null;
 
-  function esc(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-  function toNum(v){ const n = Number(v); return Number.isFinite(n) ? n : NaN; }
+  function esc(s){
+    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+  function toNum(v){
+    const n = Number(v);
+    return Number.isFinite(n) ? n : NaN;
+  }
 
   function wallHangerSize(inner){
     if(!Number.isFinite(inner)) return '';
@@ -174,18 +299,27 @@
     if(195 <= inner && inner <= 203) return 'Size 5';
     return '';
   }
-  function hangerCompatible(d){ return wallHangerSize(toNum(d?.inner_mm)) !== ''; }
+
+  function hangerCompatible(d){
+    return wallHangerSize(toNum(d?.inner_mm)) !== '';
+  }
+
   function mountCompatible(d){
     const inner = toNum(d?.inner_mm);
     const outer = toNum(d?.outer_mm);
     return (Number.isFinite(inner) && Number.isFinite(outer) && inner >= 159 && outer <= 230);
   }
-  function variableCompatible(d){ return mountCompatible(d); }
+
+  function variableCompatible(d){
+    return mountCompatible(d);
+  }
 
   function buildManufacturers(){
     const mfgs = Array.from(byMfg.keys()).sort((a,b)=>a.localeCompare(b));
-    elMfg.innerHTML = '<option value="">Select…</option>' + mfgs.map(m => `<option value="${esc(m)}">${esc(m)}</option>`).join('');
+    elMfg.innerHTML = '<option value="">Select…</option>' +
+      mfgs.map(m => `<option value="${esc(m)}">${esc(m)}</option>`).join('');
   }
+
   function buildModels(mfg){
     if(!mfg){
       elModel.disabled = true;
@@ -195,11 +329,20 @@
     const list = byMfg.get(mfg) || [];
     const models = list.map(d => d.model).sort((a,b)=>a.localeCompare(b));
     elModel.disabled = false;
-    elModel.innerHTML = '<option value="">Select…</option>' + models.map(m => `<option value="${esc(m)}">${esc(m)}</option>`).join('');
+    elModel.innerHTML = '<option value="">Select…</option>' +
+      models.map(m => `<option value="${esc(m)}">${esc(m)}</option>`).join('');
   }
-  function findDisc(mfg, model){ return (byMfg.get(mfg) || []).find(d => d.model === model) || null; }
 
-  function setResult(el, text, kind){ el.textContent = text; el.classList.remove('danger','ok'); if(kind) el.classList.add(kind); }
+  function findDisc(mfg, model){
+    return (byMfg.get(mfg) || []).find(d => d.model === model) || null;
+  }
+
+  function setResult(el, text, kind){
+    el.textContent = text;
+    el.classList.remove('danger','ok');
+    if(kind) el.classList.add(kind);
+  }
+
   function setInfoBubble(text){
     if(!text){
       infoBubble.style.display = 'none';
@@ -209,32 +352,38 @@
     infoBubble.style.display = 'block';
     positiveLine.textContent = text;
   }
-  function setSummary(text){ summary.style.display = text ? 'block' : 'none'; summary.textContent = text || ''; }
+
+  function setSummary(text){
+    summary.style.display = text ? 'block' : 'none';
+    summary.textContent = text || '';
+  }
+
   function setProductsVisibility(showAny, showWall, showMount, showVar){
     products.style.display = showAny ? 'grid' : 'none';
     wallCard.style.display = showWall ? 'block' : 'none';
     mountCard.style.display = showMount ? 'block' : 'none';
     variableCard.style.display = showVar ? 'block' : 'none';
   }
+
   function joinNice(items){
     if(items.length === 0) return '';
     if(items.length === 1) return items[0];
     if(items.length === 2) return items[0] + ' and ' + items[1];
-    return items.slice(0,-1).join(', ') + ', and ' + items[items.length-1];
+    return items.slice(0, -1).join(', ') + ', and ' + items[items.length - 1];
   }
 
   function render(){
     if(!current){
-      elPicked.innerHTML = '<span>Selected Disc:</span> —';
       setInfoBubble('');
       setSummary('');
-      setProductsVisibility(false,false,false,false);
-      setResult(elHanger,'—',null); setResult(elMount,'—',null); setResult(elVariable,'—',null);
-      copyWallBtn.disabled = true; copyMountBtn.disabled = true;
+      setProductsVisibility(false, false, false, false);
+      setResult(elHanger,'—',null);
+      setResult(elMount,'—',null);
+      setResult(elVariable,'—',null);
+      copyWallBtn.disabled = true;
+      copyMountBtn.disabled = true;
       return;
     }
-
-    elPicked.innerHTML = `<span>Selected Disc:</span> <strong>${esc(current.manufacturer)}</strong> — <strong>${esc(current.model)}</strong>`;
 
     const wallOK = hangerCompatible(current);
     const mountOK = mountCompatible(current);
@@ -252,21 +401,37 @@
     if(wallOK){
       const size = wallHangerSize(toNum(current.inner_mm));
       setResult(elHanger, size || INCOMPAT, 'ok');
-    } else setResult(elHanger, INCOMPAT, 'danger');
+    }else{
+      setResult(elHanger, INCOMPAT, 'danger');
+    }
 
-    if(mountOK) setResult(elMount, `Size ${toNum(current.inner_mm)}`, 'ok');
-    else setResult(elMount, INCOMPAT, 'danger');
+    if(mountOK){
+      setResult(elMount, `Size ${toNum(current.inner_mm)}`, 'ok');
+    }else{
+      setResult(elMount, INCOMPAT, 'danger');
+    }
 
-    if(varOK) setResult(elVariable, VAR_OK, 'ok');
-    else setResult(elVariable, INCOMPAT, 'danger');
+    if(varOK){
+      setResult(elVariable, VAR_OK, 'ok');
+    }else{
+      setResult(elVariable, INCOMPAT, 'danger');
+    }
 
-    if(wallOK && mountOK && varOK) setSummary('Summary: Your disc is compatible with the Wall Hanger, Custom Mount, and Variable Mount.');
-    else if(wallOK && !mountOK && !varOK) setSummary('Summary: Your disc is compatible with the Wall Hanger only.');
-    else if(!wallOK && mountOK && varOK) setSummary('Summary: Your disc is compatible with the Custom Mount and Variable Mount.');
-    else if(!wallOK && mountOK) setSummary('Summary: Your disc is compatible with the Custom Mount only.');
-    else if(!wallOK && varOK) setSummary('Summary: Your disc is compatible with the Variable Mount only.');
-    else if(wallOK && (mountOK || varOK)) setSummary('Summary: Your disc is compatible with the Wall Hanger and your frame mount options.');
-    else setSummary('Summary: This disc is not compatible with the Wall Hanger or frame mounts.');
+    if(wallOK && mountOK && varOK){
+      setSummary('Summary: Your disc is compatible with the Wall Hanger, Custom Mount, and Variable Mount.');
+    }else if(wallOK && !mountOK && !varOK){
+      setSummary('Summary: Your disc is compatible with the Wall Hanger only.');
+    }else if(!wallOK && mountOK && varOK){
+      setSummary('Summary: Your disc is compatible with the Custom Mount and Variable Mount.');
+    }else if(!wallOK && mountOK){
+      setSummary('Summary: Your disc is compatible with the Custom Mount only.');
+    }else if(!wallOK && varOK){
+      setSummary('Summary: Your disc is compatible with the Variable Mount only.');
+    }else if(wallOK && (mountOK || varOK)){
+      setSummary('Summary: Your disc is compatible with the Wall Hanger and your frame mount options.');
+    }else{
+      setSummary('Summary: This disc is not compatible with the Wall Hanger or frame mounts.');
+    }
 
     copyWallBtn.disabled = !wallOK;
     copyMountBtn.disabled = !mountOK;
@@ -282,6 +447,7 @@
         if(!byMfg.has(d.manufacturer)) byMfg.set(d.manufacturer, []);
         byMfg.get(d.manufacturer).push(d);
       }
+
       buildManufacturers();
       buildModels('');
       render();
@@ -291,22 +457,45 @@
     }
   }
 
-  elMfg.addEventListener('change', ()=>{ buildModels(elMfg.value); elModel.value=''; current=null; render(); });
-  elModel.addEventListener('change', ()=>{ current = (elMfg.value && elModel.value) ? findDisc(elMfg.value, elModel.value) : null; render(); });
+  elMfg.addEventListener('change', ()=>{
+    buildModels(elMfg.value);
+    elModel.value = '';
+    current = null;
+    render();
+  });
+
+  elModel.addEventListener('change', ()=>{
+    current = (elMfg.value && elModel.value) ? findDisc(elMfg.value, elModel.value) : null;
+    render();
+  });
 
   copyWallBtn.addEventListener('click', async ()=>{
     if(!current) return;
     const size = wallHangerSize(toNum(current.inner_mm));
     if(!size) return;
-    const text = `Airoframe Wall Hanger\nDisc: ${current.manufacturer} — ${current.model}\nSize: ${size}`;
-    try{ await navigator.clipboard.writeText(text); copyWallBtn.textContent='Copied'; setTimeout(()=>copyWallBtn.textContent='Copy Size', 900); }catch(e){}
+    const text =
+`Airoframe Wall Hanger
+Disc: ${current.manufacturer} — ${current.model}
+Size: ${size}`;
+    try{
+      await navigator.clipboard.writeText(text);
+      copyWallBtn.textContent = 'Copied';
+      setTimeout(()=> copyWallBtn.textContent = 'Copy Size', 900);
+    }catch(e){}
   });
 
   copyMountBtn.addEventListener('click', async ()=>{
     if(!current) return;
     if(!mountCompatible(current)) return;
-    const text = `Airoframe Custom Mount\nDisc: ${current.manufacturer} — ${current.model}\nSize: Size ${toNum(current.inner_mm)}`;
-    try{ await navigator.clipboard.writeText(text); copyMountBtn.textContent='Copied'; setTimeout(()=>copyMountBtn.textContent='Copy Size', 900); }catch(e){}
+    const text =
+`Airoframe Custom Mount
+Disc: ${current.manufacturer} — ${current.model}
+Size: Size ${toNum(current.inner_mm)}`;
+    try{
+      await navigator.clipboard.writeText(text);
+      copyMountBtn.textContent = 'Copied';
+      setTimeout(()=> copyMountBtn.textContent = 'Copy Size', 900);
+    }catch(e){}
   });
 
   init();
