@@ -10,6 +10,7 @@
       --shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
       --radius: 18px; --danger:#b42318; --ok:#067647;
       --bg1:#f7f8fb; --bg2:#ffffff;
+      --infoBg:#f0f7ff; --infoBorder:#cfe6ff; --infoText:#0b3b80;
     }
     *{ box-sizing:border-box; }
     body{
@@ -24,16 +25,44 @@
     .sub{ margin:8px 0 0; color:var(--muted); font-size:13px; line-height:1.45; max-width:76ch; }
     .card{ background:#fff; border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); padding:16px; }
     .grid{ display:grid; grid-template-columns:1fr; gap:12px; margin-top:12px; }
-    @media (min-width: 900px){ .grid{ grid-template-columns:1fr 1fr; } .card{ padding:18px; } h1{ font-size:26px; } }
+    @media (min-width: 900px){
+      .grid{ grid-template-columns:1fr 1fr; }
+      .card{ padding:18px; }
+      h1{ font-size:26px; }
+    }
     label{ display:block; font-weight:800; font-size:12px; color:var(--muted); margin:0 0 8px; letter-spacing:.02em; text-transform:uppercase; }
     select{ width:100%; appearance:none; padding:12px 12px; border-radius:14px; border:1px solid var(--border); background:#fff; font-size:14px; outline:none; }
     select:focus{ box-shadow:0 0 0 4px rgba(59,130,246,.12); border-color:#c9d6ff; }
+
     .selected{ margin-top:16px; padding-top:14px; border-top:1px solid var(--border); }
     .picked{ font-weight:900; font-size:14px; margin:0; }
     .picked span{ color:var(--muted); font-weight:800; }
-    .positiveLine{ margin:10px 0 0; font-size:13px; font-weight:800; color:var(--ok); line-height:1.35; display:none; }
+
+    .infoBubble{
+      margin-top:12px;
+      display:none;
+      padding:12px 12px;
+      border-radius:14px;
+      border:1px solid var(--infoBorder);
+      background:var(--infoBg);
+      color:var(--infoText);
+      font-weight:900;
+      font-size:13px;
+      line-height:1.35;
+    }
+    .infoBubble .label{
+      display:inline-block;
+      font-weight:950;
+      letter-spacing:.02em;
+      text-transform:uppercase;
+      font-size:11px;
+      margin-right:8px;
+      opacity:.9;
+    }
+
     .products{ display:none; grid-template-columns:1fr; gap:12px; margin-top:12px; }
     @media (min-width: 900px){ .products{ grid-template-columns:1fr 1fr 1fr; } }
+
     .product{ border:1px solid var(--border); border-radius:18px; padding:16px; background:#fff; }
     .productTitle{ margin:0; font-size:15px; font-weight:950; letter-spacing:-0.01em; }
     .productSub{ margin:6px 0 0; color:var(--muted); font-size:12px; line-height:1.45; max-width:52ch; }
@@ -41,12 +70,13 @@
     .resultValue{ font-size:18px; font-weight:950; letter-spacing:-0.02em; margin:0; text-align:left; }
     .resultValue.danger{ color:var(--danger); }
     .resultValue.ok{ color:var(--ok); }
+
     .btnrowInCard{ display:flex; gap:10px; flex-wrap:wrap; margin-top:10px; }
     button{ border:1px solid var(--border); background:#fff; border-radius:12px; padding:7px 10px; font-weight:800; font-size:12.5px; cursor:pointer; }
     button:hover{ background:#fafbff; }
     button:disabled{ opacity:.5; cursor:not-allowed; }
+
     .summary{ margin-top:12px; font-size:12px; color:var(--muted); line-height:1.45; display:none; }
-    .version{ margin-top:10px; font-size:11px; color:var(--muted); opacity:.65; }
   </style>
 </head>
 <body>
@@ -70,7 +100,11 @@
 
       <div class="selected">
         <p class="picked"><span>Selected Disc:</span> —</p>
-        <div class="positiveLine" id="positiveLine"></div>
+
+        <div class="infoBubble" id="infoBubble">
+          <span class="label">Compatibility</span>
+          <span id="positiveLine"></span>
+        </div>
 
         <div class="products" id="products">
           <div class="product" id="wallCard">
@@ -95,7 +129,6 @@
         </div>
 
         <div class="summary" id="summary"></div>
-        <div class="version">v11 (Wall Hanger Size 5)</div>
       </div>
     </div>
   </div>
@@ -106,6 +139,7 @@
   const elModel = document.getElementById('model');
 
   const elPicked = document.querySelector('.picked');
+  const infoBubble = document.getElementById('infoBubble');
   const positiveLine = document.getElementById('positiveLine');
   const summary = document.getElementById('summary');
 
@@ -131,8 +165,7 @@
   function esc(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
   function toNum(v){ const n = Number(v); return Number.isFinite(n) ? n : NaN; }
 
-  // Compute wall-hanger size in JS so you only need to refresh discs.json when PDGA list updates.
-  function wallHangerSize(inner){ 
+  function wallHangerSize(inner){
     if(!Number.isFinite(inner)) return '';
     if(159 <= inner && inner <= 167) return 'Size 1';
     if(168 <= inner && inner <= 176) return 'Size 2';
@@ -142,7 +175,7 @@
     return '';
   }
   function hangerCompatible(d){ return wallHangerSize(toNum(d?.inner_mm)) !== ''; }
-  function mountCompatible(d){ 
+  function mountCompatible(d){
     const inner = toNum(d?.inner_mm);
     const outer = toNum(d?.outer_mm);
     return (Number.isFinite(inner) && Number.isFinite(outer) && inner >= 159 && outer <= 230);
@@ -167,7 +200,15 @@
   function findDisc(mfg, model){ return (byMfg.get(mfg) || []).find(d => d.model === model) || null; }
 
   function setResult(el, text, kind){ el.textContent = text; el.classList.remove('danger','ok'); if(kind) el.classList.add(kind); }
-  function setPositiveLine(text){ positiveLine.style.display = text ? 'block' : 'none'; positiveLine.textContent = text || ''; }
+  function setInfoBubble(text){
+    if(!text){
+      infoBubble.style.display = 'none';
+      positiveLine.textContent = '';
+      return;
+    }
+    infoBubble.style.display = 'block';
+    positiveLine.textContent = text;
+  }
   function setSummary(text){ summary.style.display = text ? 'block' : 'none'; summary.textContent = text || ''; }
   function setProductsVisibility(showAny, showWall, showMount, showVar){
     products.style.display = showAny ? 'grid' : 'none';
@@ -185,7 +226,8 @@
   function render(){
     if(!current){
       elPicked.innerHTML = '<span>Selected Disc:</span> —';
-      setPositiveLine(''); setSummary('');
+      setInfoBubble('');
+      setSummary('');
       setProductsVisibility(false,false,false,false);
       setResult(elHanger,'—',null); setResult(elMount,'—',null); setResult(elVariable,'—',null);
       copyWallBtn.disabled = true; copyMountBtn.disabled = true;
@@ -204,7 +246,8 @@
     if(wallOK) okProducts.push('the wall hanger');
     if(mountOK) okProducts.push('the custom mount');
     if(varOK) okProducts.push('the variable mount');
-    setPositiveLine(okProducts.length ? ('Your disc will work with ' + joinNice(okProducts) + '.') : '');
+
+    setInfoBubble(okProducts.length ? ('Your disc will work with ' + joinNice(okProducts) + '.') : '');
 
     if(wallOK){
       const size = wallHangerSize(toNum(current.inner_mm));
@@ -233,6 +276,7 @@
     try{
       const res = await fetch('./discs.json', { cache: 'no-store' });
       discs = await res.json();
+
       byMfg = new Map();
       for(const d of discs){
         if(!byMfg.has(d.manufacturer)) byMfg.set(d.manufacturer, []);
@@ -241,7 +285,7 @@
       buildManufacturers();
       buildModels('');
       render();
-    } catch(e){
+    }catch(e){
       console.error(e);
       elMfg.innerHTML = '<option value="">Error loading data</option>';
     }
