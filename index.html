@@ -103,21 +103,11 @@
       display:none;
     }
 
-    .sectionTitle{
-      margin-top: 14px;
-      font-size: 12px;
-      text-transform: uppercase;
-      letter-spacing: .08em;
-      color: var(--muted);
-      font-weight: 900;
-      display:none;
-    }
-
     .products{
       display:none;
       grid-template-columns: 1fr;
       gap: 12px;
-      margin-top: 10px;
+      margin-top: 12px;
     }
     @media (min-width: 900px){
       .products{ grid-template-columns: 1fr 1fr 1fr; }
@@ -169,9 +159,9 @@
       border: 1px solid var(--border);
       background: #fff;
       border-radius: 12px;
-      padding: 7px 10px;           /* smaller */
+      padding: 7px 10px;
       font-weight: 800;
-      font-size: 12.5px;           /* smaller */
+      font-size: 12.5px;
       cursor: pointer;
     }
     button:hover{ background:#fafbff; }
@@ -213,7 +203,7 @@
         <p class="picked"><span>Selected Disc:</span> —</p>
         <div class="positiveLine" id="positiveLine"></div>
 
-        <div class="sectionTitle" id="sectionTitle">Recommended products</div>
+        <!-- Removed "Recommended products" text -->
 
         <div class="products" id="products">
           <div class="product" id="wallCard">
@@ -250,9 +240,7 @@
               <p class="resultValue" id="variableValue">—</p>
             </div>
 
-            <div class="btnrowInCard">
-              <button id="copyVariableBtn" type="button" disabled>Copy Size</button>
-            </div>
+            <!-- Removed copy button for Variable Mount -->
           </div>
         </div>
 
@@ -270,7 +258,6 @@
   const positiveLine = document.getElementById('positiveLine');
   const summary = document.getElementById('summary');
 
-  const sectionTitle = document.getElementById('sectionTitle');
   const products = document.getElementById('products');
 
   const wallCard = document.getElementById('wallCard');
@@ -283,7 +270,6 @@
 
   const copyWallBtn = document.getElementById('copyWallBtn');
   const copyMountBtn = document.getElementById('copyMountBtn');
-  const copyVariableBtn = document.getElementById('copyVariableBtn');
 
   const INCOMPAT = 'Disc Selected Is Incompatible';
   const VAR_OK = 'Compatible with Variable Mount';
@@ -332,8 +318,7 @@
     return (Number.isFinite(inner) && Number.isFinite(outer) && inner >= 159 && outer <= 230);
   }
   function variableCompatible(d){
-    // same rules as custom mount
-    return mountCompatible(d);
+    return mountCompatible(d); // same rules as custom mount
   }
 
   function setResult(el, text, kind){
@@ -363,11 +348,17 @@
   }
 
   function setProductsVisibility(showAny, showWall, showMount, showVar){
-    sectionTitle.style.display = showAny ? 'block' : 'none';
     products.style.display = showAny ? 'grid' : 'none';
     wallCard.style.display = showWall ? 'block' : 'none';
     mountCard.style.display = showMount ? 'block' : 'none';
     variableCard.style.display = showVar ? 'block' : 'none';
+  }
+
+  function joinNice(items){
+    if(items.length === 0) return '';
+    if(items.length === 1) return items[0];
+    if(items.length === 2) return items[0] + ' and ' + items[1];
+    return items.slice(0, -1).join(', ') + ', and ' + items[items.length - 1];
   }
 
   function render(){
@@ -381,7 +372,6 @@
       setResult(elVariable,'—',null);
       copyWallBtn.disabled = true;
       copyMountBtn.disabled = true;
-      copyVariableBtn.disabled = true;
       return;
     }
 
@@ -393,28 +383,18 @@
 
     setProductsVisibility((wallOK || mountOK || varOK), wallOK, mountOK, varOK);
 
-    // Positive line (ONLY positive statements)
-    if(wallOK && mountOK){
-      setPositiveLine('Your disc will work with the wall hanger and the custom mount.');
-    }else if(wallOK && !mountOK && varOK){
-      // if mount not ok but var ok shouldn't happen since same rules, but keep clean
-      setPositiveLine('Your disc will work with the wall hanger and the variable mount.');
-    }else if(wallOK && !mountOK){
-      setPositiveLine('Your disc will work with the wall hanger.');
-    }else if(!wallOK && (mountOK || varOK)){
-      // mention both mount types as a group
-      if(mountOK && varOK){
-        setPositiveLine('Your disc will work with the custom mount and the variable mount.');
-      }else if(mountOK){
-        setPositiveLine('Your disc will work with the custom mount.');
-      }else{
-        setPositiveLine('Your disc will work with the variable mount.');
-      }
+    // Positive line should include Variable Mount when applicable
+    const okProducts = [];
+    if(wallOK) okProducts.push('the wall hanger');
+    if(mountOK) okProducts.push('the custom mount');
+    if(varOK) okProducts.push('the variable mount');
+
+    if(okProducts.length > 0){
+      setPositiveLine('Your disc will work with ' + joinNice(okProducts) + '.');
     }else{
       setPositiveLine('');
     }
 
-    // Set values (even if hidden)
     if(wallOK){
       setResult(elHanger, current.hanger_size || INCOMPAT, 'ok');
     }else{
@@ -434,8 +414,8 @@
       setResult(elVariable, INCOMPAT, 'danger');
     }
 
-    // Summary
-    if(wallOK && mountOK){
+    // Summary (keep dynamic and inclusive)
+    if(wallOK && mountOK && varOK){
       setSummary('Summary: Your disc is compatible with the Wall Hanger, Custom Mount, and Variable Mount.');
     }else if(wallOK && !mountOK && !varOK){
       setSummary('Summary: Your disc is compatible with the Wall Hanger only.');
@@ -451,10 +431,8 @@
       setSummary('Summary: This disc is not compatible with the Wall Hanger or frame mounts.');
     }
 
-    // Copy buttons enabled only when product is compatible (and visible)
     copyWallBtn.disabled = !wallOK;
     copyMountBtn.disabled = !mountOK;
-    copyVariableBtn.disabled = !varOK;
   }
 
   async function init(){
@@ -517,20 +495,6 @@ Size: ${result}`;
       await navigator.clipboard.writeText(text);
       copyMountBtn.textContent = 'Copied';
       setTimeout(()=> copyMountBtn.textContent = 'Copy Size', 900);
-    }catch(e){}
-  });
-
-  copyVariableBtn.addEventListener('click', async ()=>{
-    if(!current) return;
-    if(!variableCompatible(current)) return;
-    const text =
-`Airoframe Variable Mount
-Disc: ${current.manufacturer} — ${current.model}
-Status: ${VAR_OK}`;
-    try{
-      await navigator.clipboard.writeText(text);
-      copyVariableBtn.textContent = 'Copied';
-      setTimeout(()=> copyVariableBtn.textContent = 'Copy Size', 900);
     }catch(e){}
   });
 
