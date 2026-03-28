@@ -128,7 +128,7 @@
     }
 
     @media (min-width: 900px){
-      .products{ grid-template-columns: 1fr 1fr 1fr; }
+      .products{ grid-template-columns: 1fr 1fr; }
     }
 
     .product{
@@ -229,13 +229,6 @@
       </div>
 
       <div class="products" id="products">
-        <div class="product" id="wallCard">
-          <p class="productTitle">Airoframe Wall Hanger</p>
-          <p class="productSub">This wall hanger works separately from our other products as a tool to securely hang your discs on the wall.</p>
-          <div class="resultWrap"><p class="resultValue" id="hangerValue">—</p></div>
-          <div class="btnrowInCard"><button id="copyWallBtn" type="button" disabled>Copy Size</button></div>
-        </div>
-
         <div class="product" id="mountCard">
           <p class="productTitle">Airoframe Custom Mount</p>
           <p class="productSub">Custom mounts are for the Air or Shield frames and don't work as a stand alone product.</p>
@@ -264,15 +257,12 @@
   const summary = document.getElementById('summary');
 
   const products = document.getElementById('products');
-  const wallCard = document.getElementById('wallCard');
   const mountCard = document.getElementById('mountCard');
   const variableCard = document.getElementById('variableCard');
 
-  const elHanger = document.getElementById('hangerValue');
   const elMount = document.getElementById('mountValue');
   const elVariable = document.getElementById('variableValue');
 
-  const copyWallBtn = document.getElementById('copyWallBtn');
   const copyMountBtn = document.getElementById('copyMountBtn');
 
   const INCOMPAT = 'Disc Selected Is Incompatible';
@@ -283,25 +273,18 @@
   let current = null;
 
   function esc(s){
-    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    return String(s).replace(/[&<>"']/g, c => ({
+      '&':'&amp;',
+      '<':'&lt;',
+      '>':'&gt;',
+      '"':'&quot;',
+      "'":'&#39;'
+    }[c]));
   }
+
   function toNum(v){
     const n = Number(v);
     return Number.isFinite(n) ? n : NaN;
-  }
-
-  function wallHangerSize(inner){
-    if(!Number.isFinite(inner)) return '';
-    if(159 <= inner && inner <= 167) return 'Size 1';
-    if(168 <= inner && inner <= 176) return 'Size 2';
-    if(177 <= inner && inner <= 185) return 'Size 3';
-    if(186 <= inner && inner <= 194) return 'Size 4';
-    if(195 <= inner && inner <= 203) return 'Size 5';
-    return '';
-  }
-
-  function hangerCompatible(d){
-    return wallHangerSize(toNum(d?.inner_mm)) !== '';
   }
 
   function mountCompatible(d){
@@ -326,8 +309,10 @@
       elModel.innerHTML = '<option value="">Select a manufacturer first</option>';
       return;
     }
+
     const list = byMfg.get(mfg) || [];
     const models = list.map(d => d.model).sort((a,b)=>a.localeCompare(b));
+
     elModel.disabled = false;
     elModel.innerHTML = '<option value="">Select…</option>' +
       models.map(m => `<option value="${esc(m)}">${esc(m)}</option>`).join('');
@@ -358,9 +343,8 @@
     summary.textContent = text || '';
   }
 
-  function setProductsVisibility(showAny, showWall, showMount, showVar){
+  function setProductsVisibility(showAny, showMount, showVar){
     products.style.display = showAny ? 'grid' : 'none';
-    wallCard.style.display = showWall ? 'block' : 'none';
     mountCard.style.display = showMount ? 'block' : 'none';
     variableCard.style.display = showVar ? 'block' : 'none';
   }
@@ -376,34 +360,23 @@
     if(!current){
       setInfoBubble('');
       setSummary('');
-      setProductsVisibility(false, false, false, false);
-      setResult(elHanger,'—',null);
+      setProductsVisibility(false, false, false);
       setResult(elMount,'—',null);
       setResult(elVariable,'—',null);
-      copyWallBtn.disabled = true;
       copyMountBtn.disabled = true;
       return;
     }
 
-    const wallOK = hangerCompatible(current);
     const mountOK = mountCompatible(current);
     const varOK = variableCompatible(current);
 
-    setProductsVisibility((wallOK || mountOK || varOK), wallOK, mountOK, varOK);
+    setProductsVisibility((mountOK || varOK), mountOK, varOK);
 
     const okProducts = [];
-    if(wallOK) okProducts.push('the wall hanger');
     if(mountOK) okProducts.push('the custom mount');
     if(varOK) okProducts.push('the variable mount');
 
     setInfoBubble(okProducts.length ? ('Your disc will work with ' + joinNice(okProducts) + '.') : '');
-
-    if(wallOK){
-      const size = wallHangerSize(toNum(current.inner_mm));
-      setResult(elHanger, size || INCOMPAT, 'ok');
-    }else{
-      setResult(elHanger, INCOMPAT, 'danger');
-    }
 
     if(mountOK){
       setResult(elMount, `Size ${toNum(current.inner_mm)}`, 'ok');
@@ -417,23 +390,16 @@
       setResult(elVariable, INCOMPAT, 'danger');
     }
 
-    if(wallOK && mountOK && varOK){
-      setSummary('Summary: Your disc is compatible with the Wall Hanger, Custom Mount, and Variable Mount.');
-    }else if(wallOK && !mountOK && !varOK){
-      setSummary('Summary: Your disc is compatible with the Wall Hanger only.');
-    }else if(!wallOK && mountOK && varOK){
+    if(mountOK && varOK){
       setSummary('Summary: Your disc is compatible with the Custom Mount and Variable Mount.');
-    }else if(!wallOK && mountOK){
+    }else if(mountOK){
       setSummary('Summary: Your disc is compatible with the Custom Mount only.');
-    }else if(!wallOK && varOK){
+    }else if(varOK){
       setSummary('Summary: Your disc is compatible with the Variable Mount only.');
-    }else if(wallOK && (mountOK || varOK)){
-      setSummary('Summary: Your disc is compatible with the Wall Hanger and your frame mount options.');
     }else{
-      setSummary('Summary: This disc is not compatible with the Wall Hanger or frame mounts.');
+      setSummary('Summary: This disc is not compatible with the available frame mount options.');
     }
 
-    copyWallBtn.disabled = !wallOK;
     copyMountBtn.disabled = !mountOK;
   }
 
@@ -469,28 +435,15 @@
     render();
   });
 
-  copyWallBtn.addEventListener('click', async ()=>{
-    if(!current) return;
-    const size = wallHangerSize(toNum(current.inner_mm));
-    if(!size) return;
-    const text =
-`Airoframe Wall Hanger
-Disc: ${current.manufacturer} — ${current.model}
-Size: ${size}`;
-    try{
-      await navigator.clipboard.writeText(text);
-      copyWallBtn.textContent = 'Copied';
-      setTimeout(()=> copyWallBtn.textContent = 'Copy Size', 900);
-    }catch(e){}
-  });
-
   copyMountBtn.addEventListener('click', async ()=>{
     if(!current) return;
     if(!mountCompatible(current)) return;
+
     const text =
 `Airoframe Custom Mount
 Disc: ${current.manufacturer} — ${current.model}
 Size: Size ${toNum(current.inner_mm)}`;
+
     try{
       await navigator.clipboard.writeText(text);
       copyMountBtn.textContent = 'Copied';
