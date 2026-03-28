@@ -171,26 +171,6 @@
     .resultValue.danger{ color: var(--danger); }
     .resultValue.ok{ color: var(--ok); }
 
-    .btnrowInCard{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      margin-top: 10px;
-    }
-
-    button{
-      border: 1px solid var(--border);
-      background: #fff;
-      border-radius: 12px;
-      padding: 7px 10px;
-      font-weight: 800;
-      font-size: 12.5px;
-      cursor: pointer;
-    }
-
-    button:hover{ background:#fafbff; }
-    button:disabled{ opacity:.5; cursor:not-allowed; }
-
     .summary{
       margin-top: 14px;
       font-size: 12px;
@@ -233,7 +213,6 @@
           <p class="productTitle">Airoframe Custom Mount</p>
           <p class="productSub">Custom mounts are for the Air or Shield frames and don't work as a stand alone product.</p>
           <div class="resultWrap"><p class="resultValue" id="mountValue">—</p></div>
-          <div class="btnrowInCard"><button id="copyMountBtn" type="button" disabled>Copy Size</button></div>
         </div>
 
         <div class="product" id="variableCard">
@@ -262,8 +241,6 @@
 
   const elMount = document.getElementById('mountValue');
   const elVariable = document.getElementById('variableValue');
-
-  const copyMountBtn = document.getElementById('copyMountBtn');
 
   const INCOMPAT = 'Disc Selected Is Incompatible';
   const VAR_OK = 'Compatible with Variable Mount';
@@ -363,7 +340,6 @@
       setProductsVisibility(false, false, false);
       setResult(elMount,'—',null);
       setResult(elVariable,'—',null);
-      copyMountBtn.disabled = true;
       return;
     }
 
@@ -399,8 +375,6 @@
     }else{
       setSummary('Summary: This disc is not compatible with the available frame mount options.');
     }
-
-    copyMountBtn.disabled = !mountOK;
   }
 
   async function init(){
@@ -433,22 +407,6 @@
   elModel.addEventListener('change', ()=>{
     current = (elMfg.value && elModel.value) ? findDisc(elMfg.value, elModel.value) : null;
     render();
-  });
-
-  copyMountBtn.addEventListener('click', async ()=>{
-    if(!current) return;
-    if(!mountCompatible(current)) return;
-
-    const text =
-`Airoframe Custom Mount
-Disc: ${current.manufacturer} — ${current.model}
-Size: Size ${toNum(current.inner_mm)}`;
-
-    try{
-      await navigator.clipboard.writeText(text);
-      copyMountBtn.textContent = 'Copied';
-      setTimeout(()=> copyMountBtn.textContent = 'Copy Size', 900);
-    }catch(e){}
   });
 
   init();
