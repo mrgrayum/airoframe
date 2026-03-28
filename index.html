@@ -146,14 +146,6 @@
       letter-spacing: -0.01em;
     }
 
-    .productSub{
-      margin:6px 0 0;
-      color: var(--muted);
-      font-size: 12px;
-      line-height: 1.45;
-      max-width: 52ch;
-    }
-
     .resultWrap{
       padding-top: 12px;
       margin-top: 12px;
@@ -272,6 +264,15 @@
     return mountCompatible(d);
   }
 
+  function sendHeightToParent(){
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage(
+        { frameHeight: document.body.scrollHeight },
+        '*'
+      );
+    }
+  }
+
   function buildManufacturers(){
     const mfgs = Array.from(byMfg.keys()).sort((a,b)=>a.localeCompare(b));
     elMfg.innerHTML = '<option value="">Select…</option>' +
@@ -338,6 +339,7 @@
       setProductsVisibility(false, false, false);
       setResult(elMount,'—',null);
       setResult(elVariable,'—',null);
+      sendHeightToParent();
       return;
     }
 
@@ -373,6 +375,8 @@
     }else{
       setSummary('Summary: This disc is not compatible with the available frame mount options.');
     }
+
+    sendHeightToParent();
   }
 
   async function init(){
@@ -389,9 +393,11 @@
       buildManufacturers();
       buildModels('');
       render();
+      sendHeightToParent();
     }catch(e){
       console.error(e);
       elMfg.innerHTML = '<option value="">Error loading data</option>';
+      sendHeightToParent();
     }
   }
 
@@ -406,6 +412,9 @@
     current = (elMfg.value && elModel.value) ? findDisc(elMfg.value, elModel.value) : null;
     render();
   });
+
+  window.addEventListener('load', sendHeightToParent);
+  window.addEventListener('resize', sendHeightToParent);
 
   init();
 })();
