@@ -124,8 +124,11 @@
     }, 100);
   }
 
-  function sendSelectionToShopify(size) {
-    window.parent.postMessage({ selectedSize: size + 'mm' }, '*');
+  function sendSelectionToShopify(disc) {
+    window.parent.postMessage({ 
+      selectedSize: disc.inner_mm + 'mm',
+      discName: disc.manufacturer + ' ' + disc.model 
+    }, '*');
   }
 
   function isCompatible(d) {
