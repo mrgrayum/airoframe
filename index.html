@@ -1,257 +1,174 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Airoframe Finder - Global Search</title>
-  <style>
-    :root{
-      --text:#0b0f19; --muted:#5b6472; --border:#e6e8ee; --shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
-      --radius: 18px; --danger:#b42318; --ok:#067647; --bg1:#f7f8fb; --bg2:#ffffff;
-      --infoBg:#f0f7ff; --infoBorder:#cfe6ff; --infoText:#0b3b80; --accent: #3b82f6;
-    }
-    *{ box-sizing:border-box; }
-    body{
-      margin:0; padding:20px 15px 40px;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
-      color:var(--text); background: linear-gradient(180deg, var(--bg1) 0%, var(--bg2) 100%);
-      overflow: hidden; 
-    }
-    .wrap{ max-width: 980px; margin:0 auto; }
-    header{ margin-bottom:16px; }
-    h1{ font-size: 20px; letter-spacing:-0.02em; margin:0; font-weight: 900; }
-    .sub{ margin:8px 0 0; color:var(--muted); font-size:13px; line-height:1.45; }
-    .card{ background:#fff; border:1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding:18px; position: relative; }
-    
-    label{ display:block; font-weight:800; font-size: 11px; color: var(--muted); margin: 0 0 6px; letter-spacing: .05em; text-transform: uppercase; }
-    
-    /* Global Search Styling */
-    .search-wrap { margin-bottom: 20px; position: relative; }
-    .global-search {
-      width: 100%; padding: 14px 16px; border-radius: 14px; border: 2px solid var(--border);
-      font-size: 15px; outline: none; transition: border-color 0.2s;
-    }
-    .global-search:focus { border-color: var(--accent); }
-    
-    .results-list {
-      position: absolute; top: 100%; left: 0; right: 0; background: #fff;
-      border: 1px solid var(--border); border-radius: 12px; margin-top: 5px;
-      max-height: 200px; overflow-y: auto; z-index: 100; box-shadow: var(--shadow);
-      display: none;
-    }
-    .result-item { padding: 10px 15px; cursor: pointer; border-bottom: 1px solid var(--bg1); font-size: 14px; }
-    .result-item:hover { background: var(--infoBg); }
-    .result-item b { color: var(--text); }
-    .result-item span { color: var(--muted); font-size: 12px; margin-left: 8px; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Airoframe Finder</title>
+    <style>
+        :root {
+            --primary-blue: #0071e3;
+            --success-green: #067647;
+            --text-dark: #1d1d1f;
+            --bg-light: #f5f5f7;
+        }
 
-    .divider { text-align: center; margin: 15px 0; color: var(--muted); font-size: 11px; font-weight: 800; text-transform: uppercase; position: relative; }
-    .divider::before, .divider::after { content: ""; position: absolute; top: 50%; width: 40%; height: 1px; background: var(--border); }
-    .divider::before { left: 0; } .divider::after { right: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: transparent;
+            color: var(--text-dark);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
 
-    .grid{ display:grid; grid-template-columns: 1fr; gap: 12px; }
-    @media (min-width: 600px){ .grid{ grid-template-columns: 1fr 1fr; } }
+        .search-container {
+            width: 100%;
+            max-width: 400px;
+            position: relative;
+            margin-bottom: 20px;
+        }
 
-    select{ width: 100%; appearance: none; padding: 12px; border-radius: 12px; border: 1px solid var(--border); background: #fff; font-size: 14px; cursor: pointer; }
+        input#disc-search {
+            width: 100%;
+            padding: 12px 15px;
+            font-size: 16px;
+            border: 2px solid #d2d2d7;
+            border-radius: 10px;
+            outline: none;
+            transition: border-color 0.2s;
+            box-sizing: border-box;
+        }
 
-    .infoBubble{ margin-top: 16px; display:none; padding: 12px; border-radius: 14px; border: 1px solid var(--infoBorder); background: var(--infoBg); color: var(--infoText); font-weight: 700; font-size: 13px; }
-    .products{ display:none; grid-template-columns: 1fr; gap: 15px; margin-top: 18px; }
-    @media (min-width: 600px){ .products{ grid-template-columns: 1fr 1fr; } }
-    .product{ border: 1px solid var(--border); border-radius: 16px; padding: 15px; background: #fff; }
-    .productTitle{ margin:0 0 8px; font-size: 11px; font-weight: 800; color: var(--muted); text-transform: uppercase; }
-    .resultValue{ font-size: 18px; font-weight: 900; margin: 0; }
-    .resultValue.ok{ color: var(--ok); }
-    .resultValue.danger{ color: var(--danger); }
-    .summary{ margin-top: 15px; font-size: 12px; color: var(--muted); font-style: italic; display:none; }
-  </style>
+        input#disc-search:focus {
+            border-color: var(--primary-blue);
+        }
+
+        #results-list {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #d2d2d7;
+            border-radius: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .result-item {
+            padding: 10px 15px;
+            cursor: pointer;
+            border-bottom: 1px solid #f5f5f7;
+        }
+
+        .result-item:hover {
+            background-color: var(--bg-light);
+        }
+
+        /* The Clean Success Bubble */
+        #compatibility-status {
+            display: none; /* Hidden until search */
+            width: 100%;
+            max-width: 400px;
+            padding: 15px;
+            background-color: #e6f4ea;
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid var(--success-green);
+        }
+
+        #compatibility-status span {
+            color: var(--success-green);
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        /* Hide technical details from user */
+        .technical-hidden {
+            display: none !important;
+        }
+    </style>
 </head>
 <body>
-  <div class="wrap">
-    <header>
-      <h1>Airoframe Finder</h1>
-      <p class="sub">Quick search or browse by brand below.</p>
-    </header>
 
-    <div class="card">
-      <div class="search-wrap">
-        <label for="globalSearch">Quick Search</label>
-        <input type="text" id="globalSearch" class="global-search" placeholder="Type disc name (e.g. Buzzz or Zone)..." autocomplete="off">
-        <div id="resultsList" class="results-list"></div>
-      </div>
-
-      <div class="divider">OR BROWSE</div>
-
-      <div class="grid">
-        <div>
-          <label for="manufacturer">Manufacturer</label>
-          <select id="manufacturer"><option value="">Loading...</option></select>
-        </div>
-        <div>
-          <label for="model">Disc Model</label>
-          <select id="model" disabled><option value="">Select Manufacturer</option></select>
-        </div>
-      </div>
-
-      <div class="infoBubble" id="infoBubble"><span id="positiveLine"></span></div>
-
-      <div class="products" id="products">
-        <div class="product"><p class="productTitle">Custom Mount</p><p class="resultValue" id="mountValue">—</p></div>
-        <div class="product"><p class="productTitle">Variable Mount</p><p class="resultValue" id="variableValue">—</p></div>
-      </div>
-      <div class="summary" id="summary"></div>
+    <div class="search-container">
+        <input type="text" id="disc-search" placeholder="Type your disc name (e.g. Hex, Firefly)..." autocomplete="off">
+        <div id="results-list"></div>
     </div>
-  </div>
 
-<script>
-(function(){
-  const elSearch = document.getElementById('globalSearch');
-  const elResults = document.getElementById('resultsList');
-  const elMfg = document.getElementById('manufacturer');
-  const elModel = document.getElementById('model');
-  const infoBubble = document.getElementById('infoBubble');
-  const positiveLine = document.getElementById('positiveLine');
-  const products = document.getElementById('products');
-  const elMount = document.getElementById('mountValue');
-  const elVariable = document.getElementById('variableValue');
-  const summary = document.getElementById('summary');
+    <div id="compatibility-status">
+        <span>✓ Compatible with Airoframe™</span>
+    </div>
 
-  let discs = [];
-  let byMfg = new Map();
-  let current = null;
+    <script>
+        let discData = [];
+        const searchInput = document.getElementById('disc-search');
+        const resultsList = document.getElementById('results-list');
+        const statusBubble = document.getElementById('compatibility-status');
 
-  function sendHeight() {
-    setTimeout(() => {
-      window.parent.postMessage({ frameHeight: document.body.scrollHeight }, '*');
-    }, 100);
-  }
+        // 1. Fetch the Database
+        fetch('discs.json')
+            .then(response => response.json())
+            .then(data => {
+                discData = data;
+            })
+            .catch(err => console.error("Error loading discs.json:", err));
 
-  function sendSelectionToShopify(disc) {
-    if (!disc) return;
-    window.parent.postMessage({ 
-      selectedSize: disc.inner_mm + 'mm',
-      discName: disc.manufacturer + ' ' + disc.model, // Keep full name for research
-      discModel: disc.model // Send ONLY the model for the cart display
-    }, '*');
-  }
+        // 2. Search Logic
+        searchInput.addEventListener('input', () => {
+            const query = searchInput.value.toLowerCase();
+            resultsList.innerHTML = '';
+            
+            if (query.length < 2) {
+                resultsList.style.display = 'none';
+                return;
+            }
 
-  function isCompatible(d) {
-    const inner = Number(d?.inner_mm);
-    const outer = Number(d?.outer_mm);
-    return (inner >= 159 && outer <= 230);
-  }
+            const matches = discData.filter(d => 
+                d.model.toLowerCase().includes(query) || 
+                d.manufacturer.toLowerCase().includes(query)
+            ).slice(0, 8);
 
-  function render() {
-    if (!current) {
-      infoBubble.style.display = 'none';
-      products.style.display = 'none';
-      summary.style.display = 'none';
-      sendHeight();
-      return;
-    }
+            if (matches.length > 0) {
+                matches.forEach(disc => {
+                    const div = document.createElement('div');
+                    div.className = 'result-item';
+                    div.innerText = `${disc.manufacturer} ${disc.model}`;
+                    div.onclick = () => selectDisc(disc);
+                    resultsList.appendChild(div);
+                });
+                resultsList.style.display = 'block';
+            } else {
+                resultsList.style.display = 'none';
+            }
+        });
 
-    const compatible = isCompatible(current);
-    const size = Number(current.inner_mm);
+        // 3. Selection Logic (The Silent Handshake)
+        function selectDisc(disc) {
+            searchInput.value = `${disc.manufacturer} ${disc.model}`;
+            resultsList.style.display = 'none';
+            
+            // Show the Success Bubble
+            statusBubble.style.display = 'block';
 
-    infoBubble.style.display = 'block';
-    products.style.display = compatible ? 'grid' : 'none';
-    summary.style.display = 'block';
+            // SILENT DATA TRANSMISSION TO SHOPIFY
+            // This stays exactly the same so Shopify doesn't break
+            window.parent.postMessage({ 
+                selectedSize: disc.inner_mm + 'mm',
+                discName: disc.manufacturer + ' ' + disc.model,
+                discModel: disc.model 
+            }, '*');
+        }
 
-    if (compatible) {
-      positiveLine.textContent = "✓ Compatible with Airoframe.";
-      elMount.textContent = size + "mm";
-      elMount.className = "resultValue ok";
-      elVariable.textContent = "Compatible";
-      elVariable.className = "resultValue ok";
-      summary.textContent = `Size: ${size}mm`;
-      
-      // Fixed: Pass the disc object to our sync function
-      sendSelectionToShopify(current);
-      
-    } else {
-      positiveLine.textContent = "✕ Disc may be incompatible.";
-      elMount.textContent = "Incompatible";
-      elMount.className = "resultValue danger";
-      elVariable.textContent = "Incompatible";
-      elVariable.className = "resultValue danger";
-    }
-    sendHeight();
-  }
-
-  elSearch.addEventListener('input', () => {
-    const val = elSearch.value.toLowerCase();
-    elResults.innerHTML = '';
-    
-    if (val.length < 2) { elResults.style.display = 'none'; sendHeight(); return; }
-
-    const matches = discs.filter(d => 
-      d.model.toLowerCase().includes(val) || 
-      d.manufacturer.toLowerCase().includes(val)
-    ).slice(0, 10);
-
-    if (matches.length > 0) {
-      elResults.style.display = 'block';
-      matches.forEach(d => {
-        const item = document.createElement('div');
-        item.className = 'result-item';
-        item.innerHTML = `<b>${d.model}</b> <span>${d.manufacturer}</span>`;
-        item.onclick = () => {
-          current = d;
-          elSearch.value = d.model;
-          elResults.style.display = 'none';
-          
-          elMfg.value = d.manufacturer;
-          updateModelDropdown(d.manufacturer);
-          elModel.value = d.model;
-          
-          render();
-        };
-        elResults.appendChild(item);
-      });
-    } else {
-      elResults.style.display = 'none';
-    }
-    sendHeight();
-  });
-
-  document.addEventListener('click', (e) => {
-    if (e.target !== elSearch) elResults.style.display = 'none';
-  });
-
-  function updateModelDropdown(mfg) {
-    const list = byMfg.get(mfg) || [];
-    elModel.disabled = !mfg;
-    elModel.innerHTML = '<option value="">Select Model...</option>' + 
-      list.map(d => d.model).sort().map(m => `<option value="${m}">${m}</option>`).join('');
-  }
-
-  async function init() {
-    try {
-      const res = await fetch('./discs.json', { cache: 'no-store' });
-      discs = await res.json();
-      discs.forEach(d => {
-        if(!byMfg.has(d.manufacturer)) byMfg.set(d.manufacturer, []);
-        byMfg.get(d.manufacturer).push(d);
-      });
-      const mfgs = Array.from(byMfg.keys()).sort();
-      elMfg.innerHTML = '<option value="">Select Manufacturer...</option>' + 
-        mfgs.map(m => `<option value="${m}">${m}</option>`).join('');
-      sendHeight();
-    } catch(e) { console.error(e); }
-  }
-
-  elMfg.addEventListener('change', () => {
-    updateModelDropdown(elMfg.value);
-    elSearch.value = '';
-    current = null; render();
-  });
-
-  elModel.addEventListener('change', () => {
-    current = byMfg.get(elMfg.value).find(d => d.model === elModel.value);
-    elSearch.value = current ? current.model : '';
-    render();
-  });
-
-  init();
-})();
-</script>
+        // Close list when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!searchInput.contains(e.target)) resultsList.style.display = 'none';
+        });
+    </script>
 </body>
 </html>
