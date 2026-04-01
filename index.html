@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Airoframe Finder - Global Search</title>
+  <title>Airoframe Finder - Clean UI</title>
   <style>
     :root{
       --text:#0b0f19; --muted:#5b6472; --border:#e6e8ee; --shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
@@ -25,7 +25,6 @@
     
     label{ display:block; font-weight:800; font-size: 11px; color: var(--muted); margin: 0 0 6px; letter-spacing: .05em; text-transform: uppercase; }
     
-    /* Global Search Styling */
     .search-wrap { margin-bottom: 20px; position: relative; }
     .global-search {
       width: 100%; padding: 14px 16px; border-radius: 14px; border: 2px solid var(--border);
@@ -41,8 +40,6 @@
     }
     .result-item { padding: 10px 15px; cursor: pointer; border-bottom: 1px solid var(--bg1); font-size: 14px; }
     .result-item:hover { background: var(--infoBg); }
-    .result-item b { color: var(--text); }
-    .result-item span { color: var(--muted); font-size: 12px; margin-left: 8px; }
 
     .divider { text-align: center; margin: 15px 0; color: var(--muted); font-size: 11px; font-weight: 800; text-transform: uppercase; position: relative; }
     .divider::before, .divider::after { content: ""; position: absolute; top: 50%; width: 40%; height: 1px; background: var(--border); }
@@ -53,15 +50,11 @@
 
     select{ width: 100%; appearance: none; padding: 12px; border-radius: 12px; border: 1px solid var(--border); background: #fff; font-size: 14px; cursor: pointer; }
 
-    .infoBubble{ margin-top: 16px; display:none; padding: 12px; border-radius: 14px; border: 1px solid var(--infoBorder); background: var(--infoBg); color: var(--infoText); font-weight: 700; font-size: 13px; }
-    .products{ display:none; grid-template-columns: 1fr; gap: 15px; margin-top: 18px; }
-    @media (min-width: 600px){ .products{ grid-template-columns: 1fr 1fr; } }
-    .product{ border: 1px solid var(--border); border-radius: 16px; padding: 15px; background: #fff; }
-    .productTitle{ margin:0 0 8px; font-size: 11px; font-weight: 800; color: var(--muted); text-transform: uppercase; }
-    .resultValue{ font-size: 18px; font-weight: 900; margin: 0; }
-    .resultValue.ok{ color: var(--ok); }
-    .resultValue.danger{ color: var(--danger); }
-    .summary{ margin-top: 15px; font-size: 12px; color: var(--muted); font-style: italic; display:none; }
+    /* The Success Bubble - Kept Visible */
+    .infoBubble{ margin-top: 16px; display:none; padding: 12px; border-radius: 14px; border: 1px solid var(--infoBorder); background: var(--infoBg); color: var(--infoText); font-weight: 700; font-size: 14px; text-align: center; }
+    
+    /* Technical Boxes - Hidden from UI but active in logic */
+    .products, .summary { display: none !important; }
   </style>
 </head>
 <body>
@@ -74,7 +67,7 @@
     <div class="card">
       <div class="search-wrap">
         <label for="globalSearch">Quick Search</label>
-        <input type="text" id="globalSearch" class="global-search" placeholder="Type disc name (e.g. Buzzz or Zone)..." autocomplete="off">
+        <input type="text" id="globalSearch" class="global-search" placeholder="Type disc name..." autocomplete="off">
         <div id="resultsList" class="results-list"></div>
       </div>
 
@@ -93,11 +86,8 @@
 
       <div class="infoBubble" id="infoBubble"><span id="positiveLine"></span></div>
 
-      <div class="products" id="products">
-        <div class="product"><p class="productTitle">Custom Mount</p><p class="resultValue" id="mountValue">—</p></div>
-        <div class="product"><p class="productTitle">Variable Mount</p><p class="resultValue" id="variableValue">—</p></div>
-      </div>
-      <div class="summary" id="summary"></div>
+      <div id="products"></div>
+      <div id="summary"></div>
     </div>
   </div>
 
@@ -109,10 +99,6 @@
   const elModel = document.getElementById('model');
   const infoBubble = document.getElementById('infoBubble');
   const positiveLine = document.getElementById('positiveLine');
-  const products = document.getElementById('products');
-  const elMount = document.getElementById('mountValue');
-  const elVariable = document.getElementById('variableValue');
-  const summary = document.getElementById('summary');
 
   let discs = [];
   let byMfg = new Map();
@@ -128,8 +114,8 @@
     if (!disc) return;
     window.parent.postMessage({ 
       selectedSize: disc.inner_mm + 'mm',
-      discName: disc.manufacturer + ' ' + disc.model, // Keep full name for research
-      discModel: disc.model // Send ONLY the model for the cart display
+      discName: disc.manufacturer + ' ' + disc.model,
+      discModel: disc.model 
     }, '*');
   }
 
@@ -142,36 +128,27 @@
   function render() {
     if (!current) {
       infoBubble.style.display = 'none';
-      products.style.display = 'none';
-      summary.style.display = 'none';
       sendHeight();
       return;
     }
 
     const compatible = isCompatible(current);
-    const size = Number(current.inner_mm);
-
     infoBubble.style.display = 'block';
-    products.style.display = compatible ? 'grid' : 'none';
-    summary.style.display = 'block';
 
     if (compatible) {
-      positiveLine.textContent = "✓ Compatible with Airoframe.";
-      elMount.textContent = size + "mm";
-      elMount.className = "resultValue ok";
-      elVariable.textContent = "Compatible";
-      elVariable.className = "resultValue ok";
-      summary.textContent = `Size: ${size}mm`;
+      positiveLine.textContent = "✓ Compatible with Airoframe™";
+      infoBubble.style.background = "#f0f7ff"; // Blueish
+      infoBubble.style.borderColor = "#cfe6ff";
+      infoBubble.style.color = "#0b3b80";
       
-      // Fixed: Pass the disc object to our sync function
+      // Still send data to Shopify even though boxes are hidden
       sendSelectionToShopify(current);
       
     } else {
       positiveLine.textContent = "✕ Disc may be incompatible.";
-      elMount.textContent = "Incompatible";
-      elMount.className = "resultValue danger";
-      elVariable.textContent = "Incompatible";
-      elVariable.className = "resultValue danger";
+      infoBubble.style.background = "#fef2f2"; // Reddish
+      infoBubble.style.borderColor = "#fee2e2";
+      infoBubble.style.color = "#991b1b";
     }
     sendHeight();
   }
@@ -179,14 +156,8 @@
   elSearch.addEventListener('input', () => {
     const val = elSearch.value.toLowerCase();
     elResults.innerHTML = '';
-    
     if (val.length < 2) { elResults.style.display = 'none'; sendHeight(); return; }
-
-    const matches = discs.filter(d => 
-      d.model.toLowerCase().includes(val) || 
-      d.manufacturer.toLowerCase().includes(val)
-    ).slice(0, 10);
-
+    const matches = discs.filter(d => d.model.toLowerCase().includes(val) || d.manufacturer.toLowerCase().includes(val)).slice(0, 10);
     if (matches.length > 0) {
       elResults.style.display = 'block';
       matches.forEach(d => {
@@ -197,11 +168,9 @@
           current = d;
           elSearch.value = d.model;
           elResults.style.display = 'none';
-          
           elMfg.value = d.manufacturer;
           updateModelDropdown(d.manufacturer);
           elModel.value = d.model;
-          
           render();
         };
         elResults.appendChild(item);
@@ -212,9 +181,7 @@
     sendHeight();
   });
 
-  document.addEventListener('click', (e) => {
-    if (e.target !== elSearch) elResults.style.display = 'none';
-  });
+  document.addEventListener('click', (e) => { if (e.target !== elSearch) elResults.style.display = 'none'; });
 
   function updateModelDropdown(mfg) {
     const list = byMfg.get(mfg) || [];
@@ -238,17 +205,8 @@
     } catch(e) { console.error(e); }
   }
 
-  elMfg.addEventListener('change', () => {
-    updateModelDropdown(elMfg.value);
-    elSearch.value = '';
-    current = null; render();
-  });
-
-  elModel.addEventListener('change', () => {
-    current = byMfg.get(elMfg.value).find(d => d.model === elModel.value);
-    elSearch.value = current ? current.model : '';
-    render();
-  });
+  elMfg.addEventListener('change', () => { updateModelDropdown(elMfg.value); elSearch.value = ''; current = null; render(); });
+  elModel.addEventListener('change', () => { current = byMfg.get(elMfg.value).find(d => d.model === elModel.value); elSearch.value = current ? current.model : ''; render(); });
 
   init();
 })();
