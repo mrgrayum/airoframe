@@ -125,9 +125,10 @@
   }
 
   function sendSelectionToShopify(disc) {
+    if (!disc) return;
+    // Sending the size formatted to match the Shopify dropdown options exactly
     window.parent.postMessage({ 
-      selectedSize: disc.inner_mm + 'mm',
-      discName: disc.manufacturer + ' ' + disc.model 
+      selectedSize: disc.inner_mm + 'mm'
     }, '*');
   }
 
@@ -160,7 +161,10 @@
       elVariable.textContent = "Compatible";
       elVariable.className = "resultValue ok";
       summary.textContent = `Size: ${size}mm`;
-      sendSelectionToShopify(size);
+      
+      // Fixed: Pass the disc object to our sync function
+      sendSelectionToShopify(current);
+      
     } else {
       positiveLine.textContent = "✕ Disc may be incompatible.";
       elMount.textContent = "Incompatible";
@@ -171,7 +175,6 @@
     sendHeight();
   }
 
-  // GLOBAL SEARCH LOGIC
   elSearch.addEventListener('input', () => {
     const val = elSearch.value.toLowerCase();
     elResults.innerHTML = '';
@@ -194,7 +197,6 @@
           elSearch.value = d.model;
           elResults.style.display = 'none';
           
-          // Sync dropdowns
           elMfg.value = d.manufacturer;
           updateModelDropdown(d.manufacturer);
           elModel.value = d.model;
@@ -209,7 +211,6 @@
     sendHeight();
   });
 
-  // CLOSE SEARCH ON OUTSIDE CLICK
   document.addEventListener('click', (e) => {
     if (e.target !== elSearch) elResults.style.display = 'none';
   });
