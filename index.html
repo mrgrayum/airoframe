@@ -128,7 +128,8 @@
     if (!disc) return;
     window.parent.postMessage({ 
       selectedSize: disc.inner_mm + 'mm',
-      discName: disc.manufacturer + ' ' + disc.model 
+      discName: disc.manufacturer + ' ' + disc.model, // Keep full name for research
+      discModel: disc.model // Send ONLY the model for the cart display
     }, '*');
   }
 
