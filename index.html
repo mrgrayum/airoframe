@@ -15,7 +15,7 @@
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             margin: 0;
-            padding: 20px;
+            padding: 15px;
             background-color: transparent;
             color: var(--text-dark);
             display: flex;
@@ -23,115 +23,124 @@
             align-items: center;
         }
 
-        .search-container {
-            width: 100%;
-            max-width: 400px;
-            position: relative;
-            margin-bottom: 20px;
-        }
+        .container { width: 100%; max-width: 400px; }
 
+        /* Search Styles */
+        .search-wrapper { position: relative; margin-bottom: 15px; }
         input#disc-search {
-            width: 100%;
-            padding: 12px 15px;
-            font-size: 16px;
-            border: 2px solid #d2d2d7;
-            border-radius: 10px;
-            outline: none;
-            transition: border-color 0.2s;
+            width: 100%; padding: 12px; font-size: 16px;
+            border: 2px solid #d2d2d7; border-radius: 10px; outline: none;
             box-sizing: border-box;
         }
-
-        input#disc-search:focus {
-            border-color: var(--primary-blue);
-        }
+        input#disc-search:focus { border-color: var(--primary-blue); }
 
         #results-list {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            background: white;
-            border: 1px solid #d2d2d7;
-            border-radius: 10px;
-            max-height: 200px;
-            overflow-y: auto;
-            z-index: 1000;
-            display: none;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            position: absolute; top: 100%; left: 0; right: 0;
+            background: white; border: 1px solid #d2d2d7; border-radius: 10px;
+            max-height: 200px; overflow-y: auto; z-index: 1000; display: none;
+        }
+        .result-item { padding: 10px; cursor: pointer; border-bottom: 1px solid #eee; }
+        .result-item:hover { background: var(--bg-light); }
+
+        /* Dropdown Styles */
+        .dropdown-group { display: flex; gap: 10px; margin-bottom: 15px; }
+        select {
+            flex: 1; padding: 10px; border-radius: 8px;
+            border: 2px solid #d2d2d7; font-size: 14px; outline: none;
         }
 
-        .result-item {
-            padding: 10px 15px;
-            cursor: pointer;
-            border-bottom: 1px solid #f5f5f7;
-        }
-
-        .result-item:hover {
-            background-color: var(--bg-light);
-        }
-
-        /* The Clean Success Bubble */
+        /* Success Bubble */
         #compatibility-status {
-            display: none; /* Hidden until search */
-            width: 100%;
-            max-width: 400px;
-            padding: 15px;
-            background-color: #e6f4ea;
-            border-radius: 12px;
-            text-align: center;
-            border: 1px solid var(--success-green);
+            display: none; width: 100%; padding: 15px;
+            background-color: #e6f4ea; border-radius: 12px;
+            text-align: center; border: 1px solid var(--success-green);
+            box-sizing: border-box;
         }
-
         #compatibility-status span {
-            color: var(--success-green);
-            font-weight: 700;
-            font-size: 1.1rem;
+            color: var(--success-green); font-weight: 700; font-size: 1.1rem;
         }
 
-        /* Hide technical details from user */
-        .technical-hidden {
-            display: none !important;
-        }
+        .divider { text-align: center; margin: 10px 0; font-size: 12px; color: #86868b; }
     </style>
 </head>
 <body>
 
-    <div class="search-container">
-        <input type="text" id="disc-search" placeholder="Type your disc name (e.g. Hex, Firefly)..." autocomplete="off">
-        <div id="results-list"></div>
-    </div>
+    <div class="container">
+        <div class="search-wrapper">
+            <input type="text" id="disc-search" placeholder="Search by disc name..." autocomplete="off">
+            <div id="results-list"></div>
+        </div>
 
-    <div id="compatibility-status">
-        <span>✓ Compatible with Airoframe™</span>
+        <div class="divider">OR BROWSE</div>
+
+        <div class="dropdown-group">
+            <select id="brand-select">
+                <option value="">Select Brand</option>
+            </select>
+            <select id="model-select" disabled>
+                <option value="">Select Model</option>
+            </select>
+        </div>
+
+        <div id="compatibility-status">
+            <span>✓ Compatible with Airoframe™</span>
+        </div>
     </div>
 
     <script>
         let discData = [];
         const searchInput = document.getElementById('disc-search');
         const resultsList = document.getElementById('results-list');
+        const brandSelect = document.getElementById('brand-select');
+        const modelSelect = document.getElementById('model-select');
         const statusBubble = document.getElementById('compatibility-status');
 
-        // 1. Fetch the Database
         fetch('discs.json')
-            .then(response => response.json())
+            .then(res => res.json())
             .then(data => {
                 discData = data;
-            })
-            .catch(err => console.error("Error loading discs.json:", err));
+                populateBrands();
+            });
 
-        // 2. Search Logic
+        function populateBrands() {
+            const brands = [...new Set(discData.map(d => d.manufacturer))].sort();
+            brands.forEach(brand => {
+                const opt = document.createElement('option');
+                opt.value = brand;
+                opt.textContent = brand;
+                brandSelect.appendChild(opt);
+            });
+        }
+
+        brandSelect.onchange = () => {
+            modelSelect.innerHTML = '<option value="">Select Model</option>';
+            if (!brandSelect.value) {
+                modelSelect.disabled = true;
+                return;
+            }
+            const models = discData.filter(d => d.manufacturer === brandSelect.value).sort((a,b) => a.model.localeCompare(b.model));
+            models.forEach(d => {
+                const opt = document.createElement('option');
+                opt.value = d.model;
+                opt.textContent = d.model;
+                modelSelect.appendChild(opt);
+            });
+            modelSelect.disabled = false;
+            statusBubble.style.display = 'none';
+        };
+
+        modelSelect.onchange = () => {
+            const disc = discData.find(d => d.manufacturer === brandSelect.value && d.model === modelSelect.value);
+            if (disc) selectDisc(disc, 'dropdown');
+        };
+
         searchInput.addEventListener('input', () => {
             const query = searchInput.value.toLowerCase();
             resultsList.innerHTML = '';
-            
-            if (query.length < 2) {
-                resultsList.style.display = 'none';
-                return;
-            }
+            if (query.length < 2) { resultsList.style.display = 'none'; return; }
 
             const matches = discData.filter(d => 
-                d.model.toLowerCase().includes(query) || 
-                d.manufacturer.toLowerCase().includes(query)
+                d.model.toLowerCase().includes(query) || d.manufacturer.toLowerCase().includes(query)
             ).slice(0, 8);
 
             if (matches.length > 0) {
@@ -139,25 +148,24 @@
                     const div = document.createElement('div');
                     div.className = 'result-item';
                     div.innerText = `${disc.manufacturer} ${disc.model}`;
-                    div.onclick = () => selectDisc(disc);
+                    div.onclick = () => selectDisc(disc, 'search');
                     resultsList.appendChild(div);
                 });
                 resultsList.style.display = 'block';
-            } else {
-                resultsList.style.display = 'none';
             }
         });
 
-        // 3. Selection Logic (The Silent Handshake)
-        function selectDisc(disc) {
-            searchInput.value = `${disc.manufacturer} ${disc.model}`;
+        function selectDisc(disc, source) {
+            if (source === 'search') {
+                searchInput.value = `${disc.manufacturer} ${disc.model}`;
+                brandSelect.value = ""; 
+                modelSelect.innerHTML = '<option value="">Select Model</option>';
+                modelSelect.disabled = true;
+            }
             resultsList.style.display = 'none';
-            
-            // Show the Success Bubble
             statusBubble.style.display = 'block';
 
-            // SILENT DATA TRANSMISSION TO SHOPIFY
-            // This stays exactly the same so Shopify doesn't break
+            // SEND DATA TO SHOPIFY
             window.parent.postMessage({ 
                 selectedSize: disc.inner_mm + 'mm',
                 discName: disc.manufacturer + ' ' + disc.model,
@@ -165,7 +173,6 @@
             }, '*');
         }
 
-        // Close list when clicking outside
         document.addEventListener('click', (e) => {
             if (!searchInput.contains(e.target)) resultsList.style.display = 'none';
         });
