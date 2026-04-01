@@ -126,9 +126,9 @@
 
   function sendSelectionToShopify(disc) {
     if (!disc) return;
-    // Sending the size formatted to match the Shopify dropdown options exactly
     window.parent.postMessage({ 
-      selectedSize: disc.inner_mm + 'mm'
+      selectedSize: disc.inner_mm + 'mm',
+      discName: disc.manufacturer + ' ' + disc.model 
     }, '*');
   }
 
