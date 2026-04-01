@@ -10,12 +10,13 @@
             --success-green: #067647;
             --text-dark: #1d1d1f;
             --bg-light: #f5f5f7;
+            --border-gray: #d2d2d7;
         }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             margin: 0;
-            padding: 15px;
+            padding: 20px;
             background-color: transparent;
             color: var(--text-dark);
             display: flex;
@@ -23,67 +24,81 @@
             align-items: center;
         }
 
-        .container { width: 100%; max-width: 400px; }
+        .container { width: 100%; max-width: 450px; }
 
-        /* Search Styles */
+        /* Search Section */
         .search-wrapper { position: relative; margin-bottom: 15px; }
         input#disc-search {
-            width: 100%; padding: 12px; font-size: 16px;
-            border: 2px solid #d2d2d7; border-radius: 10px; outline: none;
-            box-sizing: border-box;
+            width: 100%; padding: 14px; font-size: 16px;
+            border: 2px solid var(--border-gray); border-radius: 12px; outline: none;
+            box-sizing: border-box; transition: border-color 0.2s;
         }
         input#disc-search:focus { border-color: var(--primary-blue); }
 
         #results-list {
             position: absolute; top: 100%; left: 0; right: 0;
-            background: white; border: 1px solid #d2d2d7; border-radius: 10px;
-            max-height: 200px; overflow-y: auto; z-index: 1000; display: none;
+            background: white; border: 1px solid var(--border-gray); border-radius: 12px;
+            max-height: 250px; overflow-y: auto; z-index: 1000; display: none;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
         }
-        .result-item { padding: 10px; cursor: pointer; border-bottom: 1px solid #eee; }
+        .result-item { padding: 12px 15px; cursor: pointer; border-bottom: 1px solid var(--bg-light); }
         .result-item:hover { background: var(--bg-light); }
 
-        /* Dropdown Styles */
-        .dropdown-group { display: flex; gap: 10px; margin-bottom: 15px; }
+        /* Dropdown Group */
+        .dropdown-group { display: flex; gap: 10px; margin-bottom: 20px; }
         select {
-            flex: 1; padding: 10px; border-radius: 8px;
-            border: 2px solid #d2d2d7; font-size: 14px; outline: none;
+            flex: 1; padding: 12px; border-radius: 10px;
+            border: 2px solid var(--border-gray); font-size: 14px; background: white;
         }
 
-        /* Success Bubble */
-        #compatibility-status {
-            display: none; width: 100%; padding: 15px;
-            background-color: #e6f4ea; border-radius: 12px;
-            text-align: center; border: 1px solid var(--success-green);
-            box-sizing: border-box;
-        }
-        #compatibility-status span {
-            color: var(--success-green); font-weight: 700; font-size: 1.1rem;
+        /* Result Display Boxes */
+        #result-display { display: none; margin-top: 20px; width: 100%; }
+        
+        .status-bubble {
+            padding: 15px; border-radius: 12px; text-align: center;
+            font-weight: 700; font-size: 1.1rem; margin-bottom: 15px;
+            border: 1px solid var(--success-green); background: #e6f4ea; color: var(--success-green);
         }
 
-        .divider { text-align: center; margin: 10px 0; font-size: 12px; color: #86868b; }
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .info-card {
+            background: white; border: 1px solid var(--border-gray);
+            padding: 15px; border-radius: 12px; text-align: center;
+        }
+        .info-card label { display: block; font-size: 12px; color: #86868b; margin-bottom: 5px; text-transform: uppercase; }
+        .info-card span { font-weight: 600; font-size: 1.2rem; }
+
+        .divider { text-align: center; margin: 15px 0; font-size: 13px; color: #86868b; font-weight: 500; }
     </style>
 </head>
 <body>
 
     <div class="container">
         <div class="search-wrapper">
-            <input type="text" id="disc-search" placeholder="Search by disc name..." autocomplete="off">
+            <input type="text" id="disc-search" placeholder="Search by disc name (e.g. Hex)..." autocomplete="off">
             <div id="results-list"></div>
         </div>
 
-        <div class="divider">OR BROWSE</div>
+        <div class="divider">OR BROWSE BY BRAND</div>
 
         <div class="dropdown-group">
-            <select id="brand-select">
-                <option value="">Select Brand</option>
-            </select>
-            <select id="model-select" disabled>
-                <option value="">Select Model</option>
-            </select>
+            <select id="brand-select"><option value="">Select Brand</option></select>
+            <select id="model-select" disabled><option value="">Select Model</option></select>
         </div>
 
-        <div id="compatibility-status">
-            <span>✓ Compatible with Airoframe™</span>
+        <div id="result-display">
+            <div class="status-bubble">✓ Compatible with Airoframe™</div>
+            
+            <div class="info-grid">
+                <div class="info-card">
+                    <label>Custom Mount Size</label>
+                    <span id="display-mm">-</span>
+                </div>
+                <div class="info-card">
+                    <label>Variable Mount</label>
+                    <span id="display-variable">Checking...</span>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -93,7 +108,9 @@
         const resultsList = document.getElementById('results-list');
         const brandSelect = document.getElementById('brand-select');
         const modelSelect = document.getElementById('model-select');
-        const statusBubble = document.getElementById('compatibility-status');
+        const resultDisplay = document.getElementById('result-display');
+        const displayMm = document.getElementById('display-mm');
+        const displayVar = document.getElementById('display-variable');
 
         fetch('discs.json')
             .then(res => res.json())
@@ -104,29 +121,24 @@
 
         function populateBrands() {
             const brands = [...new Set(discData.map(d => d.manufacturer))].sort();
-            brands.forEach(brand => {
+            brands.forEach(b => {
                 const opt = document.createElement('option');
-                opt.value = brand;
-                opt.textContent = brand;
+                opt.value = b; opt.textContent = b;
                 brandSelect.appendChild(opt);
             });
         }
 
         brandSelect.onchange = () => {
             modelSelect.innerHTML = '<option value="">Select Model</option>';
-            if (!brandSelect.value) {
-                modelSelect.disabled = true;
-                return;
-            }
+            if (!brandSelect.value) { modelSelect.disabled = true; return; }
             const models = discData.filter(d => d.manufacturer === brandSelect.value).sort((a,b) => a.model.localeCompare(b.model));
             models.forEach(d => {
                 const opt = document.createElement('option');
-                opt.value = d.model;
-                opt.textContent = d.model;
+                opt.value = d.model; opt.textContent = d.model;
                 modelSelect.appendChild(opt);
             });
             modelSelect.disabled = false;
-            statusBubble.style.display = 'none';
+            resultDisplay.style.display = 'none';
         };
 
         modelSelect.onchange = () => {
@@ -138,11 +150,7 @@
             const query = searchInput.value.toLowerCase();
             resultsList.innerHTML = '';
             if (query.length < 2) { resultsList.style.display = 'none'; return; }
-
-            const matches = discData.filter(d => 
-                d.model.toLowerCase().includes(query) || d.manufacturer.toLowerCase().includes(query)
-            ).slice(0, 8);
-
+            const matches = discData.filter(d => d.model.toLowerCase().includes(query) || d.manufacturer.toLowerCase().includes(query)).slice(0, 8);
             if (matches.length > 0) {
                 matches.forEach(disc => {
                     const div = document.createElement('div');
@@ -158,14 +166,16 @@
         function selectDisc(disc, source) {
             if (source === 'search') {
                 searchInput.value = `${disc.manufacturer} ${disc.model}`;
-                brandSelect.value = ""; 
-                modelSelect.innerHTML = '<option value="">Select Model</option>';
-                modelSelect.disabled = true;
+                brandSelect.value = ""; modelSelect.disabled = true;
             }
             resultsList.style.display = 'none';
-            statusBubble.style.display = 'block';
+            resultDisplay.style.display = 'block';
+            
+            // UI Updates
+            displayMm.innerText = disc.inner_mm + 'mm';
+            displayVar.innerText = (disc.inner_mm >= 180 && disc.inner_mm <= 195) ? "Yes" : "No";
 
-            // SEND DATA TO SHOPIFY
+            // The Handshake
             window.parent.postMessage({ 
                 selectedSize: disc.inner_mm + 'mm',
                 discName: disc.manufacturer + ' ' + disc.model,
@@ -173,9 +183,7 @@
             }, '*');
         }
 
-        document.addEventListener('click', (e) => {
-            if (!searchInput.contains(e.target)) resultsList.style.display = 'none';
-        });
+        document.addEventListener('click', (e) => { if (!searchInput.contains(e.target)) resultsList.style.display = 'none'; });
     </script>
 </body>
 </html>
